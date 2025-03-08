@@ -1,0 +1,347 @@
+
+
+.page_container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    border: 1px solid red;
+    
+}
+
+.GD_details {
+    border: 1px solid white;
+    width: 100%;
+    height: 900px;
+    padding: 10px 50px;
+}
+
+.titleCard {
+    color: white;
+    font-size: 35px;
+    margin-bottom: 17px;
+}
+
+
+
+.content_requirement {
+    background-color: White;
+    height: 80%;
+    border-radius: 25px;
+}
+
+
+
+
+
+
+
+/* Sidebar CSS below this */
+
+.sidebar_container {
+    
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    
+
+    padding-top: 55px;
+    border: 2px solid purple;
+    background-color: #F8A13E;
+    height: 94.5vh;
+    width: 35vh;
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+    min-width: 200px;
+    max-width: 300px;
+    min-height: 94.5vh;
+}
+
+.side_header {
+    display: flex;
+    flex-direction: column;
+    
+    
+    border: 1px solid red;
+    color: white;
+    font-size: 30px;
+    font-weight: 600;
+}
+
+.content_details {
+    
+    border: 1px solid red;
+    display: flex;
+    flex-direction: column;
+    line-height: 60px;
+    padding-top: 10px;
+    padding-bottom: 260px;
+    margin: 0;
+}
+
+.sidebar_page {
+    
+    font-size: clamp(12px, 1.3vw, 18px);
+    padding-left: clamp(10px, 2vw, 35px);
+
+    text-decoration: none;
+    text-align: left;
+    color: white;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+}
+
+h2 {
+    margin-top: 0;
+}
+
+/* Button CSS */
+
+
+
+.sideButton {
+    font-family: "Outfit", sans-serif;
+    font-size: clamp(12px, 1.2vw, 18px);
+    background-color: transparent;
+    color: white;
+    border: none;
+    padding: clamp(5px, 1vw, 10px) clamp(10px, 2vw, 20px);
+    border-radius: 25px; 
+    display: block;
+    width: fit-content;
+    margin: 10px 0;
+    text-align: center;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    
+    text-decoration: none;
+    text-align: left;
+    margin-left: -18px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    min-height: 2vh;
+}
+
+/* Hover effect */
+.sideButton:hover {
+    background-color: white;
+    color: black;
+}
+
+.toprightFeatures {
+    display: flex;
+    justify-content: right;
+    margin-top: 18px;
+}
+
+
+/* Notification Button CSS */
+.notificationButton {
+    border: solid red;
+    display: flex;
+    background-color: transparent;
+    color: white;
+}
+
+/* Profile Button CSS */
+.profileButton {
+    font-family: "Outfit", sans-serif;
+    background-color: white;
+    border: none;
+    color: black;
+    border-radius: 20px;
+    font-size: 15px;
+    padding: 7px 15px 7px 15px;
+    display: flex;
+}
+
+/* Add Goals Button CSS */
+.addButton {
+    font-family: "Outfit", sans-serif;
+    background-color: #F8A13E;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 55px 10px 52px;
+    font-size: 16px;
+    font-weight: 400;
+    display: flex;
+    margin-bottom: 10px;
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.addButton:hover {
+    background-color: #e69535;
+}
+
+.addText {
+    text-align: center;
+}
+
+
+/* Overlay effect */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+/* Pop-up Box */
+.popup-box {
+    background: linear-gradient(to bottom, #f4a03f, #4ca6a9);
+    width: 420px;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    animation: slideUp 0.4s ease-out;
+}
+
+.popupTitle {
+    color: white;
+    font-weight: 500;
+    font-size: 25px;
+    margin-top: -10px;
+}
+
+.aboveType {
+    color: white;
+    display: flex;
+    margin-top: 10px;
+}
+
+/* Slide-up animation */
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Input Fields */
+.box {
+    font-family: "Outfit", sans-serif;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    display: flex;
+    padding: 7px 200px 7px 15px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.boxOut {
+    font-family: "Outfit", sans-serif;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    display: flex;
+    padding: 7px 200px 80px 15px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.deadline-input {
+    font-family: "Outfit", sans-serif;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    display: flex;
+    padding: 7px 7px 7px 15px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.deadlineUnit {
+    font-family: "Outfit", sans-serif;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    display: flex;
+    padding: 7px 120px 7px 15px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+
+/* Dropdown Styling (only for Deadline Unit) */
+.popup-box select {
+    appearance: none;
+    background: white;
+    cursor: pointer;
+}
+
+/* Deadline Inputs */
+.deadline-container {
+    display: flex;
+    gap: 10px;
+}
+
+
+/* Buttons */
+.popup-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+    
+    
+}
+
+.submit-btn {
+    
+    background: #f4a03f;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 450;
+}
+
+.cancel-btn {
+    background: transparent;
+    color: white;
+    border: 1px solid white;
+    padding: 10px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.submit-btn:hover {
+    background: #e69535;
+}
+
+.cancel-btn:hover {
+    background: white;
+    color: #333;
+}
+
+
+/* Table CSS */
+.goalsTable {
+    width: 90%;
+
+}
+
+.goalsTable th {
+    padding-top: 18px;
+}

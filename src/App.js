@@ -4,6 +4,7 @@ import Dashboard from './components/Dashboard';
 import FitnessPlanner from './components/FitnessPlanner';
 import Settings from './components/Settings';
 import Profile from './components/Profile';
+import Goals from './components/MyGoals';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/planner" element={<FitnessPlanner />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/goals" element={<Goals />} />
       </Routes>
     </Router>
   );
