@@ -5,6 +5,7 @@ import FitnessPlanner from './components/FitnessPlanner';
 import Settings from './components/Settings';
 import Profile from './components/Profile';
 import Goals from './components/MyGoals';
+import GoalDescription from './components/GoalsDescription';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/goals" element={<Goals />} />
+        <Route path="/goals/:id" element={<GoalDescription/>}/>
       </Routes>
     </Router>
   );
