@@ -6,6 +6,9 @@
 body {
   background-color: #071836;
   font-family: 'Ubuntu', sans-serif;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .background::before, .background::after {
@@ -27,4 +30,84 @@ body {
   background-color: #ffffff;
   bottom: -100px;
   right: -100px;
+}
+
+/* Utility classes that maintain Tailwind's functionality */
+.text-3xl {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
+/* Ensure we have responsive utilities similar to Tailwind */
+.space-y-4 > * + * {
+  margin-top: 1rem;
+}
+
+/* Custom styles file for trackfit app */
+.font-ubuntu {
+  font-family: 'Ubuntu', sans-serif;
+}
+
+/* Background gradient colors */
+.bg-gradient-trackfit {
+  background: linear-gradient(to bottom, #F8A13E, #6ECAE3, #01B1E3);
+}
+
+/* Blur effect for background */
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+}
+
+/* Transitions */
+.transition-colors {
+  transition-property: color, background-color, border-color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+/* Fix for z-index issues with the mobile sidebar button */
+.sidebar-toggle-button {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1100 !important; /* Higher z-index to ensure visibility */
+  background-color: transparent;
+  border: none;
+  color: white;
+}
+
+/* Ensure content doesn't overlap with the toggle button in mobile view */
+@media (max-width: 767.98px) {
+  .mobile-adjusted-content {
+    padding-top: 70px !important;
+  }
+  
+  .navbar-brand {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .container-dashboard {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
+
+/* Fix for mobile navigation */
+.offcanvas-backdrop {
+  z-index: 1040;
+}
+
+.offcanvas {
+  z-index: 1045;
+}
+
+/* Utility classes */
+.min-h-screen {
+  min-height: 100vh;
 }
