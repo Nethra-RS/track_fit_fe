@@ -1,12 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Background from './Background';
 import Sidebar from './Sidebar';
 import { Link, useLocation } from 'react-router-dom';
+import { Menu } from 'lucide-react';
 
 const SettingsPage = () => {
   const sidebarWidth = 256;
   const [activeTab, setActiveTab] = useState('account');
   const location = useLocation();
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // Check window size
+  useEffect(() => {
+    const checkSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkSize();
+    window.addEventListener('resize', checkSize);
+    return () => window.removeEventListener('resize', checkSize);
+  }, []);
   
   // Profile info (placeholders to be fetched from DB)
   const [profileInfo, setProfileInfo] = useState({
@@ -20,7 +33,7 @@ const SettingsPage = () => {
     weight: ''
   });
   
-  // Password change state (now always visible)
+  // Password change state
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
     newPassword: '',
@@ -74,111 +87,138 @@ const SettingsPage = () => {
     alert('Password changed successfully!');
   };
   
+  // Handle save changes
+  const handleSaveChanges = () => {
+    // In a real app, you would submit all changes to your backend
+    alert('Changes saved successfully!');
+  };
+  
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen font-ubuntu flex relative">
       {/* Import components */}
       <Sidebar />
       <Background sidebarWidth={sidebarWidth} />
       
       {/* Main content area */}
       <div 
-        className="relative pt-24 pb-12 px-8" 
+        className="overflow-auto relative z-10 px-3 px-md-4"
         style={{ 
-          marginLeft: `${sidebarWidth}px`,
-          width: `calc(100% - ${sidebarWidth}px)`,
+          marginLeft: isMobile ? '0' : `${sidebarWidth}px`,
+          width: isMobile ? '100%' : `calc(100% - ${sidebarWidth}px)`,
+          marginTop: '64px', // Match the navbar height in Background.js
+          paddingBottom: isMobile ? '80px' : '32px', // Extra padding for mobile save button
+          transition: 'margin-left 0.3s ease-in-out'
         }}
       >
-        <h1 className="text-3xl font-bold text-white mb-6">Settings</h1>
+        <div className="mb-4 mt-4">
+          <h1 className="text-3xl font-bold text-white">Settings</h1>
+        </div>
         
         {/* Settings Card */}
-        <div className="bg-white rounded-lg p-6 shadow-lg">
-          {/* Tabs */}
-          <div className="border-b mb-6">
-            <nav className="flex space-x-8" aria-label="Settings tabs">
+        <div className="bg-white rounded-lg p-4 md:p-6 shadow-lg mb-6">
+          {/* Tabs - Horizontal for desktop, vertical for mobile */}
+          <div className={`${isMobile ? 'flex flex-col space-y-2' : 'border-b mb-6'}`}>
+            <nav className={`${isMobile ? 'flex flex-col space-y-2' : 'flex space-x-8'}`} aria-label="Settings tabs">
               <button
                 onClick={() => handleTabChange('account')}
-                className={`pb-4 px-1 ${activeTab === 'account' ? 'border-b-2 border-blue-600 font-medium text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                className={`
+                  ${isMobile 
+                    ? `p-3 rounded-lg text-left ${activeTab === 'account' ? 'bg-blue-100 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-100'}`
+                    : `pb-3 px-1 ${activeTab === 'account' ? 'border-b-2 border-blue-600 font-medium text-blue-600' : 'text-gray-500 hover:text-gray-700'}`
+                  }
+                `}
               >
                 Account Info
               </button>
               <button
                 onClick={() => handleTabChange('notifications')}
-                className={`pb-4 px-1 ${activeTab === 'notifications' ? 'border-b-2 border-blue-600 font-medium text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                className={`
+                  ${isMobile 
+                    ? `p-3 rounded-lg text-left ${activeTab === 'notifications' ? 'bg-blue-100 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-100'}`
+                    : `pb-3 px-1 ${activeTab === 'notifications' ? 'border-b-2 border-blue-600 font-medium text-blue-600' : 'text-gray-500 hover:text-gray-700'}`
+                  }
+                `}
               >
                 Notifications
               </button>
               <button
                 onClick={() => handleTabChange('help')}
-                className={`pb-4 px-1 ${activeTab === 'help' ? 'border-b-2 border-blue-600 font-medium text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                className={`
+                  ${isMobile 
+                    ? `p-3 rounded-lg text-left ${activeTab === 'help' ? 'bg-blue-100 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-100'}`
+                    : `pb-3 px-1 ${activeTab === 'help' ? 'border-b-2 border-blue-600 font-medium text-blue-600' : 'text-gray-500 hover:text-gray-700'}`
+                  }
+                `}
               >
                 Help & Support
               </button>
             </nav>
           </div>
           
-          <div className="space-y-8">
+          <div className="space-y-4 md:space-y-8">
             {/* Account Info Section */}
             {activeTab === 'account' && (
               <section id="account-info">
-                <h2 className="text-xl font-medium mb-4">Account Information</h2>
-                <p className="text-gray-600 mb-6">
+                <h2 className="text-xl font-medium mb-2">Account Information</h2>
+                <p className="text-gray-600 mb-4">
                   Manage your personal information and account settings.
                 </p>
                 
-                <div className="bg-gray-50 p-6 rounded-lg mb-6">
+                {/* Profile Info Card - Same for both mobile and desktop */}
+                <div className="bg-gray-50 p-4 md:p-6 rounded-lg mb-6">
                   <div className="flex items-center mb-4">
-                    <div className="w-16 h-16 bg-gray-300 rounded-full flex-shrink-0 mr-4"></div>
+                    <div className="w-12 h-12 md:w-16 md:h-16 bg-gray-300 rounded-full flex-shrink-0 mr-4"></div>
                     <div>
-                      <h3 className="text-lg font-medium">Hi,</h3>
-                      <p className="text-xl font-bold">{profileInfo.firstName || 'User'} {profileInfo.lastName}</p>
+                      <h3 className="text-base md:text-lg font-medium">Hi,</h3>
+                      <p className="text-lg md:text-xl font-bold">{profileInfo.firstName || 'User'} {profileInfo.lastName}</p>
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
                     <div>
                       <p className="text-sm text-gray-500">Email</p>
-                      <p className="font-medium">{profileInfo.email}</p>
+                      <p className="font-medium">{profileInfo.email || 'user@example.com'}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Phone</p>
-                      <p className="font-medium">{profileInfo.phone}</p>
+                      <p className="font-medium">{profileInfo.phone || '+1 555-123-4567'}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Gender</p>
-                      <p className="font-medium">{profileInfo.gender}</p>
+                      <p className="font-medium">{profileInfo.gender || 'Not specified'}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Age</p>
-                      <p className="font-medium">{profileInfo.age}</p>
+                      <p className="font-medium">{profileInfo.age || '30'}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Height</p>
-                      <p className="font-medium">{profileInfo.height ? `${profileInfo.height} m` : ''}</p>
+                      <p className="font-medium">{profileInfo.height ? `${profileInfo.height} m` : '1.75 m'}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Weight</p>
-                      <p className="font-medium">{profileInfo.weight ? `${profileInfo.weight} lbs` : ''}</p>
+                      <p className="font-medium">{profileInfo.weight ? `${profileInfo.weight} lbs` : '160 lbs'}</p>
                     </div>
                   </div>
                   
                   <Link 
                     to="/profile" 
                     state={{ from: location.pathname }}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors inline-block"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors inline-block text-sm md:text-base"
                   >
                     Edit Profile
                   </Link>
                 </div>
                 
-                <div className="space-y-6">
-                  <div className="border-t pt-6">
-                    <h3 className="font-medium mb-4">Account Management</h3>
+                <div className="space-y-4 md:space-y-6">
+                  <div className="border-t pt-4 md:pt-6">
+                    <h3 className="font-medium mb-3 md:mb-4">Account Management</h3>
                     
-                    {/* Password Change Section - Now Always Visible */}
+                    {/* Password Change Section */}
                     <div className="mb-6">
-                      <h4 className="font-medium mb-4">Change Password</h4>
+                      <h4 className="font-medium mb-3 md:mb-4">Change Password</h4>
                       
-                      <form onSubmit={handlePasswordSubmit} className="bg-gray-50 p-4 rounded-md space-y-4">
+                      <form onSubmit={handlePasswordSubmit} className="bg-gray-50 p-4 rounded-md space-y-3 md:space-y-4">
                         <div>
                           <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
                             Current Password
@@ -190,7 +230,7 @@ const SettingsPage = () => {
                             value={passwordForm.currentPassword}
                             onChange={handlePasswordChange}
                             required
-                            className="block w-full max-w-md rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2 border"
+                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 border"
                           />
                         </div>
                         
@@ -205,7 +245,7 @@ const SettingsPage = () => {
                             value={passwordForm.newPassword}
                             onChange={handlePasswordChange}
                             required
-                            className="block w-full max-w-md rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2 border"
+                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 border"
                           />
                         </div>
                         
@@ -220,14 +260,14 @@ const SettingsPage = () => {
                             value={passwordForm.confirmPassword}
                             onChange={handlePasswordChange}
                             required
-                            className="block w-full max-w-md rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2 border"
+                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 border"
                           />
                         </div>
                         
                         <div>
                           <button
                             type="submit"
-                            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+                            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm md:text-base"
                           >
                             Change Password
                           </button>
@@ -235,14 +275,14 @@ const SettingsPage = () => {
                       </form>
                     </div>
                     
-                    <div className="space-y-4">
-                      <button className="text-blue-600 hover:text-blue-800 font-medium">
+                    <div className="space-y-3 md:space-y-4">
+                      <button className="text-blue-600 hover:text-blue-800 font-medium block">
                         Manage Account
                       </button>
-                      <button className="text-red-600 hover:text-red-800 font-medium">
+                      <button className="text-red-600 hover:text-red-800 font-medium block">
                         Delete Account
                       </button>
-                      <button className="text-blue-600 hover:text-blue-800 font-medium">
+                      <button className="text-blue-600 hover:text-blue-800 font-medium block">
                         Logout
                       </button>
                     </div>
@@ -254,8 +294,8 @@ const SettingsPage = () => {
             {/* Notifications Section */}
             {activeTab === 'notifications' && (
               <section id="notifications">
-                <h2 className="text-xl font-medium mb-4">Notifications</h2>
-                <p className="text-gray-600 mb-6">
+                <h2 className="text-xl font-medium mb-2">Notifications</h2>
+                <p className="text-gray-600 mb-4">
                   Customize how and when you receive updates about your fitness goals and progress.
                 </p>
                 
@@ -346,36 +386,41 @@ const SettingsPage = () => {
                   </div>
                 </div>
                 
-                <div className="mt-6">
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
-                    Save Notification Preferences
-                  </button>
-                </div>
+                {!isMobile && (
+                  <div className="mt-6">
+                    <button 
+                      onClick={handleSaveChanges}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                      Save Notification Preferences
+                    </button>
+                  </div>
+                )}
               </section>
             )}
             
             {/* Help & Support Section */}
             {activeTab === 'help' && (
               <section id="help-support">
-                <h2 className="text-xl font-medium mb-4">Help & Support</h2>
-                <p className="text-gray-600 mb-6">
+                <h2 className="text-xl font-medium mb-2">Help & Support</h2>
+                <p className="text-gray-600 mb-4">
                   Get assistance with using TrackFit and find answers to common questions.
                 </p>
                 
-                <div className="space-y-8">
+                <div className="space-y-4 md:space-y-8">
                   {/* FAQ Link */}
-                  <div className="bg-gray-50 p-6 rounded-lg">
+                  <div className="bg-gray-50 p-4 md:p-6 rounded-lg">
                     <h3 className="font-medium mb-2">Frequently Asked Questions</h3>
-                    <p className="text-gray-600 mb-4">Find answers to commonly asked questions about using our platform.</p>
+                    <p className="text-gray-600 mb-3 md:mb-4">Find answers to commonly asked questions about using our platform.</p>
                     <Link to="/faqs" className="text-blue-600 hover:text-blue-800 font-medium">
                       View FAQ Page →
                     </Link>
                   </div>
                   
                   {/* Contact Support Link */}
-                  <div className="bg-gray-50 p-6 rounded-lg">
+                  <div className="bg-gray-50 p-4 md:p-6 rounded-lg">
                     <h3 className="font-medium mb-2">Contact Support</h3>
-                    <p className="text-gray-600 mb-4">Need additional help? Our support team is ready to assist you.</p>
+                    <p className="text-gray-600 mb-3 md:mb-4">Need additional help? Our support team is ready to assist you.</p>
                     <Link to="/contact" className="text-blue-600 hover:text-blue-800 font-medium">
                       Go to Contact Page →
                     </Link>
@@ -383,7 +428,7 @@ const SettingsPage = () => {
                   
                   {/* Additional Support Options */}
                   <div>
-                    <h3 className="font-medium mb-4">Additional Resources</h3>
+                    <h3 className="font-medium mb-3 md:mb-4">Additional Resources</h3>
                     <div className="space-y-2">
                       <Link to="/tutorials" className="block text-blue-600 hover:text-blue-800">
                         Video Tutorials
@@ -401,6 +446,18 @@ const SettingsPage = () => {
             )}
           </div>
         </div>
+        
+        {/* Mobile Save Button - Fixed at bottom */}
+        {isMobile && (
+          <div className="fixed bottom-0 left-0 right-0 bg-white p-3 shadow-lg border-t z-20">
+            <button
+              onClick={handleSaveChanges}
+              className="w-full bg-[#F8A13E] text-white font-medium py-3 px-4 rounded-xl"
+            >
+              Save Changes
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
