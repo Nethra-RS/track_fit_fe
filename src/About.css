@@ -1,0 +1,56 @@
+.about-container {
+    display: flex;
+    flex-direction: column; /* Stack elements vertically */
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding: 20px;
+    position: relative; /* Needed for absolute positioning of the logo */
+}
+
+/* About Box Styling */
+.about-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 120px; /* Increased left & right padding */
+    text-align: center;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.5rem;
+    color: white;
+    border-radius: 20px;
+    background: linear-gradient(90deg, #F8A13E 0%, #01B1E3 100%);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease-in-out;
+    width: auto;
+    max-width: 85%;
+    min-width: 300px;
+    max-height: 80vh;
+    overflow: hidden;
+    word-wrap: break-word;
+}
+
+
+/* Ensure the text inside the box wraps properly */
+.about-box h2,
+.about-box p {
+    margin: 10px 0;
+    width: 100%; /* Makes sure text stays within the box */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .about-box {
+        font-size: 1.2rem;
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .about-box {
+        font-size: 1rem;
+        padding: 15px;
+    }
+}
+

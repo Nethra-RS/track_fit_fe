@@ -1,0 +1,175 @@
+body {
+  margin: 0; 
+}
+
+.our-team-container {
+  text-align: center;
+  padding: 2rem;
+}
+
+.our-team-container h2 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 2.5rem;
+  color: #fff;
+  margin-bottom: 1.5rem;
+}
+
+.team-grid {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.team-member {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  border-radius: 10px;
+  width: 220px; /* Slightly larger width */
+  font-family: 'Outfit', sans-serif;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.team-member:hover {
+  transform: translateY(-5px);
+}
+
+.icon-container {
+  font-size: 3rem;
+  color: #f8a13e;
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.team-member h3 {
+  font-size: 1.2rem;
+  color: #fff;
+}
+
+.team-member p {
+  font-size: 1rem;
+  color: #ddd;
+}
+
+/* Footer Styling */
+.footer-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8a13e;
+  color: white;
+  padding: 1rem 10%; 
+  margin: 3rem auto 0; /* Centers the footer */
+  width: 70%; 
+  box-sizing: border-box;
+  border-radius: 10px; 
+}
+
+.footer-container .left {
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.footer-container .right {
+  display: flex;
+  gap: 2rem;
+}
+
+/* Footer Columns */
+.footer-container .column {
+  font-family: 'Outfit', sans-serif;
+  text-align: left;
+  width: 100%; /* Ensure each column takes full width */
+  margin: 0; /* Prevent margin causing issues */
+  padding: 0; /* Prevent any extra padding */
+}
+
+/* Footer List */
+.footer-container .column ul {
+  list-style: none;
+  background-color: #f8a13e;
+  padding: 0;
+  margin: 0;
+  width: 100%; /* Ensure the list takes full width */
+}
+
+/* Footer List Items */
+.footer-container .column ul li {
+  width: 100%;
+  background-color: #f8a13e; /* Consistent Orange Background */
+  text-align: center;
+  padding: 0; /* Remove extra padding */
+  margin: 0; /* Remove any margin to prevent white space */
+  border: none;
+}
+
+/* Links and Buttons in Footer */
+.footer-container .column ul li a,
+.footer-container .column ul li button {
+  text-decoration: none;
+  color: white;
+  display: block;
+  width: 100%;
+  padding: 10px; /* Ensure consistent padding */
+  background-color: #f8a13e;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: color 0.3s, background-color 0.3s;
+  box-sizing: border-box; /* Ensures padding doesn't exceed the box width */
+}
+
+/* Hover Effects */
+.footer-container .column ul li a:hover,
+.footer-container .column ul li button:hover {
+  color: #333;
+}
+
+/* Button-Specific Fix */
+.footer-container .column ul li button {
+  font-family: inherit;
+  outline: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .team-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .team-member {
+    width: 100%;
+    max-width: 400px;
+    padding: 1.5rem;
+  }
+
+  .footer-container {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .footer-container .right {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* Ensuring background color fills properly */
+  .footer-container .column ul li a,
+  .footer-container .column ul li button {
+    padding: 10px;
+    margin: 0;
+  }
+}
+
+
+
+
+
+  

@@ -1,0 +1,81 @@
+/* Container Styling */
+.Bug-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  padding: 20px;
+  font-family: 'Outfit', sans-serif;
+  text-align: center;
+  position: relative;
+}
+
+
+/* Report a Bug Title */
+.Bug-container h2 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 2vh;
+}
+
+/* Textarea Styling */
+.issue {
+  width: 80%;
+  max-width: 600px;
+  height: 450px;
+  padding: 15px;
+  font-size: 1rem;
+  font-family: 'Outfit', sans-serif;
+  border: 2px solid #F8A13E;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #333;
+  outline: none;
+  resize: none;
+  margin-bottom: 20px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.issue::placeholder {
+  color: #999;
+}
+
+/* Submit Button */
+.Bug {
+  background-color: #F8A13E;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+}
+
+.Bug:hover {
+  background-color: #e8902f;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+
+
+  .Bug-container h2 {
+    font-size: 2rem;
+    margin-bottom: 2vh;
+  }
+
+  .issue {
+    width: 90%;
+    height: 120px;
+    font-size: 0.9rem;
+  }
+
+  .Bug {
+    font-size: 1rem;
+    padding: 10px 20px;
+  }
+}
