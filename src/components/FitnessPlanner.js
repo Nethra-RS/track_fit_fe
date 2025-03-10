@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Background from "./Background";
 import Sidebar from "./Sidebar";
+import MobileHeader from "./MobileHeader";
 
 const FitnessPlanner = () => {
   const [selectedGoals, setSelectedGoals] = useState([
@@ -9,6 +10,18 @@ const FitnessPlanner = () => {
     false,
     false,
   ]);
+  const [showSidebar, setShowSidebar] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const sidebarWidth = 256;
+
+  // Handle mobile detection
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const toggleGoal = (index) => {
     const newSelectedGoals = [...selectedGoals];
@@ -16,17 +29,26 @@ const FitnessPlanner = () => {
     setSelectedGoals(newSelectedGoals);
   };
 
+  const toggleSidebar = () => {
+    setShowSidebar(!showSidebar);
+  };
+
   const calendarDays = Array.from({ length: 31 }, (_, i) => i + 1);
 
   return (
-    <div className="min-h-screen flex">
-      <Background />
-      <Sidebar />
+    <div className="min-h-screen">
+      {/* Mobile Header - only shown on mobile */}
+      {isMobile && <MobileHeader toggleSidebar={toggleSidebar} />}
+      <Sidebar show={showSidebar} handleClose={() => setShowSidebar(false)} />
+      <Background sidebarWidth={sidebarWidth} />
 
       {/* Content Wrapper */}
       <div
-        className="flex-grow flex flex-col px-4 md:px-8 pt-20 pb-20 overflow-auto"
-        style={{ marginLeft: "256px" }}
+        className={`relative pb-12 ${isMobile ? "px-4 pt-20" : "px-8 pt-24"}`}
+        style={{
+          marginLeft: isMobile ? "0" : `${sidebarWidth}px`,
+          width: isMobile ? "100%" : `calc(100% - ${sidebarWidth}px)`,
+        }}
       >
         <h1 className="text-3xl font-bold text-white mb-10">Fitness Planner</h1>
 
