@@ -10,11 +10,20 @@ import FAQ from "./FAQ";
 import TOS from "./TOS";
 import Support from "./Support";
 import ReportBugs from "./ReportBugs";
-import './App.css';
-import './theme.css';
+import Dashboard from "./components/Dashboard";
+import Settings from "./components/Settings";
+import FitnessPlanner from "./components/FitnessPlanner";
+import Profile from "./components/Profile";
+import MyGoalsPage from "./components/MyGoals";
+import GoalDescription from "./components/GoalsDescription";
 
+// Import Bootstrap CSS (after installing the package)
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./index.css";
+import "./App.css";
+import "./theme.css";
 
-function App() {
+const App = () => {
   return (
     <Router>
       <Routes>
@@ -22,16 +31,30 @@ function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/ForgotPassword" element={<ForgotPassword />} />
-        <Route path="/RequestConfirmation" element={<ResetPasswordConfirmation />} />
+        <Route
+          path="/RequestConfirmation"
+          element={<ResetPasswordConfirmation />}
+        />
         <Route path="/Contact" element={<Contact />} />
         <Route path="/FAQ" element={<FAQ />} />
         <Route path="/TOS" element={<TOS />} />
         <Route path="/Support" element={<Support />} />
         <Route path="/ReportBugs" element={<ReportBugs />} />
+
+        <Route path="/dashboard" element={<Dashboard />} />
+        {/* Add other routes as needed */}
+        <Route path="/goals" element={<MyGoalsPage />} />
+        <Route path="/planner" element={<FitnessPlanner />} />
+        <Route path="/ai-tool" element={<div>AI Tool</div>} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/about" element={<div>About</div>} />
+        <Route path="/team" element={<div>Team</div>} />
+        <Route path="/profile" element={<Profile />} />
+
+        <Route path="/goals/:id" element={<GoalDescription />} />
       </Routes>
     </Router>
   );
-}
+};
 
 export default App;
-
