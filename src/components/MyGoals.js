@@ -55,8 +55,9 @@ const MyGoalsPage = () => {
       const [goal, setGoal] = useState({
           target: "",
           outcome: "",
-          deadlineValue: "",
-          deadlineUnit: "Month(s)",
+          startDateValue: "",
+          endDateValue: "",
+          deadlineUnit: "",
       });
   
       const handleOpenPopup = () => setShowPopup(true);
@@ -118,7 +119,7 @@ const MyGoalsPage = () => {
                                     />
 
                                     {/* Expected Outcome */}
-                                    <label className="aboveType">Expected Outcome</label>
+                                    <label className="aboveType">Current Progress</label>
                                     <input className="boxOut"
                                         type="int"
                                         name="outcome"
@@ -127,24 +128,61 @@ const MyGoalsPage = () => {
                                         placeholder="Enter a value"
                                     ></input>
 
-                                    {/* Deadline Inputs */}
-                                    <label className="aboveType">Deadline</label>
+                                    {/* Deadline Inputs // Start date - End date */}
+                                    <label className="aboveType">Start Date</label>
                                     <div className="deadline-container">
                                         <input className="deadline-input"
-                                            type="text"
-                                            name="deadlineValue"
-                                            value={goal.deadlineValue}
+                                            type="num"
+                                            name="startDateValue"
+                                            value={goal.startDateValue}
                                             onChange={handleChange}
                                             placeholder="Enter a value"
                                         />
                                         <div>
                                             <select className="deadlineUnit" value={goal.deadlineUnit} onChange={handleChange}>
-                                                <option value="Days">Days</option>
-                                                <option value="Months">Months</option>
-                                                <option value="Years">Years</option>
+                                              <option value="month">January</option>
+                                              <option value="month">February</option>
+                                              <option value="month">March</option>
+                                              <option value="month">April</option>
+                                              <option value="month">May</option>
+                                              <option value="month">June</option>
+                                              <option value="month">July</option>
+                                              <option value="month">August</option>
+                                              <option value="month">September</option>
+                                              <option value="month">October</option>
+                                              <option value="month">November</option>
+                                              <option value="month">December</option>
                                             </select>
                                         </div>
                                     </div>
+
+                                    <label className="aboveType">End date</label>
+                                    <div className="deadline-container">
+                                    <input className="deadline-input"
+                                          type="num"
+                                          name="endDateValue"
+                                          value={goal.endDateValue}
+                                          onChange={handleChange}
+                                          placeholder="Enter a value"
+                                      />
+                                      <div>
+                                        <select className="deadlineUnit" value={goal.deadlineUnit} onChange={handleChange}>
+                                          <option value="month">January</option>
+                                          <option value="month">February</option>
+                                          <option value="month">March</option>
+                                          <option value="month">April</option>
+                                          <option value="month">May</option>
+                                          <option value="month">June</option>
+                                          <option value="month">July</option>
+                                          <option value="month">August</option>
+                                          <option value="month">September</option>
+                                          <option value="month">October</option>
+                                          <option value="month">November</option>
+                                          <option value="month">December</option>
+                                        </select>
+                                      </div>
+                                    </div>
+                                    
 
                                     {/* Buttons */}
                                     <div className="popup-buttons">
@@ -164,8 +202,9 @@ const MyGoalsPage = () => {
                                 <th>S.No.</th>
                                 <th>Type of Goal</th>
                                 <th>Target</th>
-                                <th>Expected Outcome</th>
-                                <th>Deadline</th>
+                                <th>Current Progress</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
                             </tr>
                         </thead>
                         <tbody>
