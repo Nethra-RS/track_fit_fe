@@ -1,0 +1,206 @@
+.support-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Ensure full viewport height */
+  font-family: 'Outfit', sans-serif;
+}
+
+.content-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  max-width: 900px;
+}
+
+.support-title {
+  margin-top: 125px;
+  font-weight: bold;
+  margin-bottom: -60px;
+  color: #fffbfb;
+}
+
+.support-content {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  width: 100%;
+  margin-bottom: 100px;
+}
+
+.support-form {
+  flex: 0.48; /* Each column takes up 48% of the width */
+  padding: 20px;
+  background: #f4f4f4bb;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* Ensure content is aligned to the top */
+  height: auto; /* Ensure form takes full height of parent container */
+  max-height: 100vh; /* Ensure form does not exceed viewport height */
+  margin-bottom: 20px;
+  margin-top: 100px;
+}
+
+.support-form p {
+  text-align: left;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  font-family: 'outfit' sans-serif;
+}
+
+label {
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid ;
+  background: #f4f4f4bb;
+  border-radius: 5px;
+  font-family: 'Outfit', sans-serif;
+}
+
+textarea {
+  min-height: 100px;
+}
+
+.message {
+  padding: 10px 20px;
+  background-color: #F8A13E; /* Change to your desired background color */
+  color: white; /* Text color */
+  border: none;
+  border-radius: 5px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+  margin-top: 10px; /* Space above the button */
+  font-size: 16px; /* Font size */
+  font-family: 'Outfit', sans-serif;
+  transition: background-color 0.3s ease
+}
+
+.support-resources {
+  flex: 0.48; /* Each column takes up 48% of the width */
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.support-resources h2 {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color:#f4f4f4a2;
+}
+
+.resource-card {
+  background: #f4f4f4bb;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.resource-card:hover {
+  transform: translateY(-3px);
+}
+
+.resource-icon {
+  font-size: 40px;
+  color: #01b1e3;
+  margin-bottom: 10px;
+}
+
+.resource-card h4 {
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+.resource-card p {
+  font-size: 14px;
+  color: #000000;
+  margin-bottom: 10px;
+}
+
+.resource-card a {
+  text-decoration: none;
+  font-weight: bold;
+  color: #01b1e3;
+}
+
+.resource-card a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .support-container .support-page {
+    flex-direction: column; /* Stack content vertically on mobile */
+  }
+
+  /* Logo centering */
+  .support-page .logo1 {
+    font-size: 5vw; /* Adjust font-size to viewport width */
+    margin-bottom: 4vw;
+  }
+
+  .content-wrapper {
+    align-items: center; /* Centers content on smaller screens */
+  }
+
+  .support-title {
+    margin-bottom: 3vw; /* Adjust spacing */
+    padding-top: 8vh; /* Use viewport height, less than before to avoid cutting off content */
+  }
+
+  .support-content {
+    flex-direction: column;
+    gap: 2vw; /* Use viewport width for gap */
+  }
+
+  .support-form,
+  .support-resources {
+    width: 80%;
+    margin-top: 5vh; /* Use viewport height for margin */
+    align-self: center;
+  }
+
+  .support-form {
+    margin-bottom: 5vh; 
+    /* Use viewport height */
+  }
+
+  /* Adjust padding to avoid content overflow */
+  .support-container {
+    padding-top: 10vh; /* Adjust padding-top to avoid cut off */
+    display: flex;
+    justify-content: flex-start; /* Ensure proper positioning */
+    align-items: flex-start; /* Align to the top */
+  }
+
+  /* Make resource cards responsive */
+  .resource-card {
+    padding: 3vh; /* Use viewport height for padding */
+  }
+}
+.support-resources h2 {
+  margin-bottom: 3vw; /* Adjust spacing */
+  padding-top: 8vh; /* Use viewport height, less than before to avoid cutting off content */
+}
+
+
+
+
+
+

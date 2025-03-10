@@ -1,0 +1,121 @@
+.resend-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: 'Outfit', sans-serif;
+}
+
+.resend-box {
+  display: flex;
+  background: white;
+  padding: 40px;
+  border-radius: 30px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 55%;
+  justify-content: space-between;
+}
+
+.resend-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 50%;
+  padding: 22px;
+}
+
+.resend-form .reset {
+  margin-top: 0;
+  font-size: 28px;
+  font-weight: bold;
+  text-align: center;
+  color: black;
+  margin-bottom: 20px;
+}
+
+.resend-form p {
+  margin-top: 5px;
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+
+
+.resend,
+.goback-btn {
+  background-color: #f8a13e;
+  border: 1px solid #ccc;
+  color: white;
+  padding: 10px;
+  border-radius: 30px;
+  cursor: pointer;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 18px;
+}
+
+.resend:hover,
+.goback-btn:hover {
+  background-color: #e28b2c;
+}
+
+.resend a,
+.goback-btn a {
+  color: white;
+  text-decoration: none;
+}
+
+.resend-image {
+  width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.resend-image img {
+  max-width: 100%;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .resend-box {
+    flex-direction: column; /* Stack content vertically on mobile */
+    width: 90%; /* Ensure form box is responsive */
+    padding: 20px; /* Adjust padding for mobile */
+  }
+
+  .resend-form {
+    width: 100%; /* Make form and image full width on mobile */
+  }
+
+  .resend-image {
+    display: none; /* Add space between form and image */
+  }
+
+  .resend-form .reset {
+    margin-top: 3vw 1vh;
+    font-size: 6vw; /* Adjust font-size for smaller screens */
+    margin-bottom: 3vw; /* Reduce bottom margin for smaller screens */
+  }
+
+  .resend-form p {
+    font-size: 4vw; /* Adjust font-size for smaller screens */
+  }
+
+  .resend-container .logo1 {
+    font-size: 6vw;
+    margin-bottom: 3vh;
+  }
+
+  .resend, .goback-btn {
+    padding: 8px; /* Adjust padding for smaller screens */
+    font-size: 4vw; /* Adjust font-size for smaller screens */
+    width: 100%;  /* Adjust font-size for smaller screens */
+  }
+
+  .goback-btn {
+    margin-top: 2vw; /* Reduce top margin for smaller screens */
+  }
+}
+
+  

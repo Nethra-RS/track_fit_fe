@@ -1,0 +1,263 @@
+body {
+  background-color: #071836;
+  position: relative;
+  margin: 0;
+  height: 100vh;
+  z-index: -1;
+}
+
+.background-new {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+}
+
+.background-new::before, .background-new::after {
+  content: "";
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  filter: blur(150px);
+}
+
+.background-new::before {
+  background-color: #F8A13E;
+  top: -100px;
+  right: -100px;
+}
+
+.background-new::after {
+  background-color: #01B1E3;
+  bottom: -100px;
+  left: -100px;
+}
+
+.logo1 {
+  position: absolute;
+  top: 20px;
+  left: 80px;
+  color: white;
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 32px;
+}
+
+.trackfit1 {
+  font-size: 32px;
+}
+
+.dot1 {
+  font-size: 48px;
+}
+
+/* 🔹 Centering the Sign-in Section */
+.signin-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 20px;
+  position: relative;
+  gap: 0;
+}
+
+/* 🔹 Image Side */
+.signin-image {
+  width: 440px;
+  height: 530px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  margin-left: 10px;
+}
+
+.signin-image img {
+  width: 105%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 55px;
+}
+
+/* 🔹 Sign-in Box */
+.signin-box {
+  width: 400px;
+  height: 500px;
+  background: white;
+  border-radius: 55px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  max-width: 95%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+
+/* 🔹 Sign-in Form */
+.signin-form {
+  padding: 40px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  font-family: 'Outfit', sans-serif;
+  height: 100%;
+}
+
+/* 🔹 Form Title */
+.signin-form .sign {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #000000;
+}
+
+/* 🔹 Input Fields */
+.input-group {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  font-size: 14px;
+  font-weight: 500;
+  display: block;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-bottom: 2px solid black;
+  font-size: 14px;
+  outline: none;
+  background: transparent;
+}
+
+/* 🔹 Sign-in Button */
+.signin-btn {
+  width: 100%;
+  padding: 12px;
+  background: #F8A13E;
+  border: none;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 30px;
+  cursor: pointer;
+  margin-top: 5px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* 🔹 Separator */
+.separator {
+  margin: 15px 0;
+  font-size: 12px;
+  color: gray;
+}
+
+/* 🔹 Google Sign-in Button */
+.google-btn {
+  flex-direction: row-reverse;
+  width: 100%;
+  padding: 12px;
+  background: white;
+  border: none;
+  color: black;
+  font-size: 18px;
+  border-radius: 30px;
+  cursor: pointer;
+  margin-top: 5px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: 'Outfit', sans-serif;
+}
+
+.google-btn img {
+  width: 20px;
+  height: 20px;
+}
+
+/* 🔹 "Create an Account" & "Forgot Password" */
+.signin-links {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 5px;
+  font-size: 14px;
+}
+
+.signin-links a {
+  text-decoration: none;
+}
+
+/* 🔹 Responsive Design */
+
+/* Tablet and Larger Screens (Centered Layout) */
+@media (max-width: 1200px) and (min-width: 901px) {
+  .signin-container {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .signin-box, .signin-image {
+    margin: 0;
+  }
+}
+
+/* Mobile view adjustments */
+@media (max-width: 768px) {
+  .signin-container {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .signin-image {
+    display: none;
+  }
+
+  .signin-box {
+    width: 90vw;
+    height: auto;
+    margin-top: 20px;
+  }
+
+  .signin-form {
+    width: 100%;
+    padding: 3vh;
+  }
+
+  .signin-links {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8vw;
+  }
+
+  /* Logo should be centered and stacked above the form box */
+  .logo1 {
+    position: static; /* Remove absolute positioning */
+    margin-bottom: 20px; /* Space between logo and form box */
+    text-align: center; /* Center the logo */
+  }
+}
+
+
+
+
+
+
+
+

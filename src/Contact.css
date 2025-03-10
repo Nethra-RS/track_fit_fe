@@ -1,0 +1,116 @@
+/* Contact Us Page Styles */
+.contact-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: 'Outfit', sans-serif;
+  padding: 20px;
+  text-align: center;
+}
+
+
+.contact-title {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 30px;
+  color: #f8a13e;
+}
+
+.contact-cards {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  width: 100%;
+  max-width: 900px;
+}
+
+.contact-card {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  flex: 1;
+  max-width: 250px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.contact-icon {
+  font-size: 50px;
+  color: #01b1e3;
+  margin-bottom: 10px;
+}
+
+.contact-card h4 {
+  font-size: 18px;
+  font-weight: bold;
+  color: #f8a13e;
+  margin-bottom: 10px;
+}
+
+.contact-card p {
+  font-size: 14px;
+  color: #ffffff;
+  margin-bottom: 10px;
+}
+
+.contact-card a {
+  text-decoration: none;
+  font-weight: bold;
+  color: #01b1e3;
+}
+
+.contact-card a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .contact-container {
+    flex-direction: column; /* Stack content vertically on mobile */
+    padding-top: 10vh; /* Ensures proper spacing from the top */
+    display: flex;
+    justify-content: flex-start; /* Ensures proper positioning */
+    align-items: center; /* Centers all elements */
+  }
+
+  /* Logo centering */
+  .contact-logo {
+    font-size: 5vw; /* Adjust logo size */
+    margin-bottom: 4vw;
+  }
+
+  .contact-title {
+    margin-bottom: 3vw; /* Adjust spacing */
+    padding-top: 8vh; /* Adjust padding to prevent overlap */
+    font-size: 6vw;
+  }
+
+  .contact-cards {
+    flex-direction: column; /* Stack cards vertically */
+    gap: 2vw; /* Maintain spacing */
+    align-items: center;
+    width: 80%; /* Ensure proper width */
+  }
+
+  .contact-card {
+    width: 100%;
+    max-width: none;
+    padding: 3vh; /* Adjust padding */
+    margin-top: 5vh; /* Ensure spacing between stacked cards */
+  }
+
+  .contact-card h4 {
+    font-size: 4vw; /* Adjust title size */
+  }
+
+  .contact-icon {
+    font-size: 10vw; /* Adjust icon size */
+  }
+
+  .contact-card a {
+    font-size: 3.5vw; /* Adjust text size */
+  }
+}
+

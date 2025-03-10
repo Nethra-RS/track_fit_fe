@@ -1,0 +1,50 @@
+body {
+    background-color: #071836;
+    position: relative;
+    margin: 0;
+    height: 100vh;
+    z-index: -1;
+}
+
+.background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+}
+
+.background::before, .background::after {
+    content: "";
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    filter: blur(150px);
+}
+
+.background::before {
+    background-color: #01B1E3;
+    top: -100px;
+    left: -100px;
+}
+
+.background::after {
+    background-color: #ffffff;
+    bottom: -100px;
+    right: -100px;
+}             
+
+.logo {
+    color: white;
+    font-family: 'Ubuntu', sans-serif;
+    font-size: 32px;
+}
+.trackfit {
+    font-size: 32px;
+  }
+  
+  .dot {
+    font-size: 48px; /* Make the period larger */
+  }
