@@ -1,14 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { Container, Navbar, Nav, Dropdown } from 'react-bootstrap';
 
 const Background = ({ sidebarWidth = 256 }) => {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const location = useLocation();
 
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen);
-  };
+  // Determine if sidebar is collapsed (for mobile view)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Make sure this matches the actual sidebar width in Sidebar.js (which is 256px or 16rem)
+  const effectiveSidebarWidth = isMobile ? 0 : sidebarWidth;
 
   return (
     <>
@@ -16,8 +27,9 @@ const Background = ({ sidebarWidth = 256 }) => {
       <div 
         className="fixed inset-y-0 bg-[#071836] overflow-hidden pointer-events-none z-[-1]"
         style={{ 
-          left: `${sidebarWidth}px`,
-          width: `calc(100% - ${sidebarWidth}px)`, // Adjust background width
+          left: `${effectiveSidebarWidth}px`,
+          width: `calc(100% - ${effectiveSidebarWidth}px)`,
+          top: isMobile ? '64px' : '0', // Adjust for mobile header height
         }}
       >
         {/* Orange Circle */}
@@ -33,48 +45,47 @@ const Background = ({ sidebarWidth = 256 }) => {
         ></div>
       </div>
 
-      {/* Top Bar */}
-      <div 
-        className="fixed top-0 right-0 h-16 bg-[#071836]/50 backdrop-blur-sm z-50 flex items-center justify-end px-8"
-        style={{ 
-          left: `${sidebarWidth}px`,
-          width: `calc(100% - ${sidebarWidth}px)`, // Ensure top bar doesn't overlap
-        }}
-      >
-        <div className="flex items-center space-x-4">
-          {/* Notification Icon */}
-          <Bell className="text-white" size={24} />
+      {/* Top Bar - Only visible on desktop */}
+      {!isMobile && (
+        <Navbar 
+          className="bg-[#071836]/50 backdrop-blur-sm z-30 px-md-4 position-fixed d-none d-md-block"
+          style={{ 
+            top: 0,
+            left: `${effectiveSidebarWidth}px`,
+            width: `calc(100% - ${effectiveSidebarWidth}px)`,
+            paddingLeft: '24px',
+            paddingRight: '24px',
+            height: '64px' // Explicitly set height to match the margin-top in Dashboard.js
+          }}
+        >
+          <Container fluid className="d-flex justify-content-end p-0">
+            <Nav className="align-items-center">
+              {/* Notification Icon */}
+              <Nav.Link className="text-white p-2">
+                <Bell size={24} />
+              </Nav.Link>
 
-          {/* User Dropdown */}
-          <div className="relative">
-            <div 
-              onClick={toggleDropdown}
-              className="bg-white rounded-full px-4 py-2 flex items-center cursor-pointer"
-            >
-              <span className="mr-2 text-[#071836]">First, Last Name</span>
-              ▼
-            </div>
-            
-            {isDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg">
-                <div className="py-1">
-                  <Link 
-                    to="/profile" 
-                    state={{ from: location.pathname }}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer block"
-                    onClick={() => setIsDropdownOpen(false)}
-                  >
+              {/* User Dropdown using React Bootstrap */}
+              <Dropdown>
+                <Dropdown.Toggle 
+                  variant="light" 
+                  id="user-dropdown"
+                  className="rounded-pill px-4 py-2 d-flex align-items-center border-0 ml-2"
+                >
+                  <span className="mr-2 text-[#071836]">First, Last Name</span>
+                </Dropdown.Toggle>
+
+                <Dropdown.Menu align="end" className="mt-2 rounded-lg shadow-lg">
+                  <Dropdown.Item as={Link} to="/profile" state={{ from: location.pathname }}>
                     Profile
-                  </Link>
-                  <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                    Logout
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+                  </Dropdown.Item>
+                  <Dropdown.Item>Logout</Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            </Nav>
+          </Container>
+        </Navbar>
+      )}
     </>
   );
 };
