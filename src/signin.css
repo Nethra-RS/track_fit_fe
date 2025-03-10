@@ -2,11 +2,12 @@ body {
   background-color: #071836;
   position: relative;
   margin: 0;
-  height: 100vh;
+  min-height: 100vh;
   z-index: -1;
 }
 
 .background-new {
+  background-color: #071836;
   position: fixed;
   top: 0;
   left: 0;
@@ -53,18 +54,16 @@ body {
   font-size: 48px;
 }
 
-/* 🔹 Centering the Sign-in Section */
 .signin-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
   padding: 20px;
   position: relative;
   gap: 0;
 }
 
-/* 🔹 Image Side */
 .signin-image {
   width: 440px;
   height: 530px;
@@ -82,7 +81,6 @@ body {
   border-radius: 55px;
 }
 
-/* 🔹 Sign-in Box */
 .signin-box {
   width: 400px;
   height: 500px;
@@ -109,7 +107,7 @@ body {
   height: 100%;
 }
 
-/* 🔹 Form Title */
+/*  Form Title */
 .signin-form .sign {
   font-size: 22px;
   font-weight: 700;
@@ -118,7 +116,7 @@ body {
   color: #000000;
 }
 
-/* 🔹 Input Fields */
+/*  Input Fields */
 .input-group {
   width: 100%;
   margin-bottom: 20px;
@@ -140,7 +138,7 @@ body {
   background: transparent;
 }
 
-/* 🔹 Sign-in Button */
+/* Sign-in Button */
 .signin-btn {
   width: 100%;
   padding: 12px;
@@ -155,14 +153,14 @@ body {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
-/* 🔹 Separator */
+/*  Separator */
 .separator {
   margin: 15px 0;
   font-size: 12px;
   color: gray;
 }
 
-/* 🔹 Google Sign-in Button */
+/*  Google Sign-in Button */
 .google-btn {
   flex-direction: row-reverse;
   width: 100%;
@@ -187,7 +185,7 @@ body {
   height: 20px;
 }
 
-/* 🔹 "Create an Account" & "Forgot Password" */
+/*  "Create an Account" & "Forgot Password" */
 .signin-links {
   display: flex;
   justify-content: space-between;
@@ -200,7 +198,7 @@ body {
   text-decoration: none;
 }
 
-/* 🔹 Responsive Design */
+/* Responsive Design */
 
 /* Tablet and Larger Screens (Centered Layout) */
 @media (max-width: 1200px) and (min-width: 901px) {
@@ -246,11 +244,11 @@ body {
     gap: 0.8vw;
   }
 
-  /* Logo should be centered and stacked above the form box */
+ 
   .logo1 {
-    position: static; /* Remove absolute positioning */
-    margin-bottom: 20px; /* Space between logo and form box */
-    text-align: center; /* Center the logo */
+    position: static; 
+    margin-bottom: 20px; 
+    text-align: center; 
   }
 }
 

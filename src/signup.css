@@ -1,4 +1,4 @@
-/* 🔹 Centering the Sign-up Section */
+
 .signup-container {
   display: flex;
   justify-content: center;
@@ -6,18 +6,21 @@
   min-height: 100vh;
   padding: 20px;
   position: relative;
-  gap: 0; /* Remove spacing between image and sign-up box */
+  gap: 0; 
 }
 
-/* 🔹 Image Side */
+.signup-container .background{
+  background-color: #071836;
+}
+
 .signup-image {
-  width: 440px; /* Adjusted width to make it look bigger */
-  height: 550px; /* Adjusted height to make it look bigger */
+  width: 440px; 
+  height: 550px; 
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2; /* Ensure the image is below the pop-up */
-  margin-left: 10px; /* Overlap with sign-up box */
+  z-index: 2; 
+  margin-left: 10px; 
 }
 
 .signup-image img {
@@ -27,10 +30,10 @@
   border-radius: 55px;
 }
 
-/* 🔹 Sign-up Box */
+
 .signup-box {
-  width: 400px; /* Adjust width */
-  height: 550px; /* Adjust height */
+  width: 400px; 
+  height: 550px; 
   background: white;
   border-radius: 30px;
   overflow: hidden;
@@ -39,11 +42,11 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  z-index: 1; /* Ensure the sign-up box is below the pop-up */
+  z-index: 1; 
   position: relative;
 }
 
-/* 🔹 Sign-up Form */
+/* Sign-up Form */
 .signup-form {
   padding: 40px 40px;
   display: flex;
@@ -194,11 +197,11 @@
 
 /* Subtext styling */
 .sub-text {
-  font-size: 14px; /* Adjust the size as needed */
-  color: #777; /* Adjust the color as needed */
-  text-align: center; /* Center the text */
-  margin-bottom: 10px; /* Adjust the spacing as needed */
-  font-style: italic; /* Optional: make the text italic for emphasis */
+  font-size: 14px; 
+  color: #777; 
+  text-align: center; 
+  margin-bottom: 10px; 
+  font-style: italic; 
 }
 
 .input-group input,
@@ -223,7 +226,7 @@
   margin-top: 10px;
 }
 
-/* 🔹 Tablet & Mobile View Adjustments */
+/*  Tablet & Mobile View Adjustments */
 @media (max-width: 1200px) and (min-width: 901px) {
   .signup-container {
     flex-direction: row;
@@ -238,7 +241,7 @@
 
 }
 
-/* 🔹 Mobile Screens */
+/*  Mobile Screens */
 @media (max-width: 768px) {
   .signup-container{
     flex-direction: column;
@@ -268,9 +271,9 @@
   }
 
   .signup-page .logo1 {
-    position: static; /* Remove absolute positioning */
-    margin-bottom: 20px; /* Space between logo and form box */
-    text-align: center; /* Center the logo */
+    position: static; 
+    margin-bottom: 20px; 
+    text-align: center; 
   }
 
   .dialogue-box {
@@ -284,4 +287,3 @@
 
 
 
-  

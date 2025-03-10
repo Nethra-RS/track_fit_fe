@@ -7,11 +7,15 @@
   font-family: 'Outfit', sans-serif;
   text-align: center;
 }
+.FAQ-container .background{
+  background-color: #071836;
+  z-index: -1;
+}
 
-h2 {
+.FAQ-container .FAQH {
   font-size: 32px;
   font-weight: bold;
-  color: #fffdfa;
+  color: #f8a13e;
   margin-bottom: 20px;
 }
 

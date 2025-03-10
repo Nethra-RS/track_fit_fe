@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "./signup.css";
 import image from "./images.png"; 
 import image1 from "./image 2.png";
+import "./theme.css";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");

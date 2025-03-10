@@ -2,29 +2,48 @@
 *,
 *::before,
 *::after {
-    box-sizing: border-box; /* Prevents overflow by including padding and borders in width/height */
+    box-sizing: border-box; 
 }
 .landing-container {
     height: 100vh;
     width: 100%;
     position: relative;
-    overflow-x: hidden; /* Prevent horizontal scrolling */
+    overflow-x: hidden; 
 }  
+.landing-container .background{
+    background-color: #071836;
+}
+.landing-container .logo {
+  color: white;
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 32px;
+  align-items: center;
+}
+
+.trackfit {
+  font-size: 32px;
+}
+
+.dot {
+  font-size: 48px;
+}
 
 /* Navbar */
 .navbar {
     position: static;
     top: 0;
     left: 0;
-    width: 100%;
+    width: 90%;
     display: flex;
-    justify-content: space-between;  /* Distribute space properly */
+    justify-content: space-between;  
     align-items: center;
-    padding: 15px 5%; /* Adjust padding to maintain space from the sides */
     font-family: 'Outfit', sans-serif;
-    font-size: 24px;
+    font-size: 28px;
     font-weight: bold;
     z-index: 1000;
+    padding: 1rem 10%; 
+    margin: 3rem auto 0; 
+    width: 85%;
 }
 
 /* Navigation Links */
@@ -72,19 +91,19 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 3% 10% 5% 10%; /* Adjusted padding for better spacing */
-    margin-top: -20px;  /* Remove negative margin */
+    padding: 3% 10% 5% 10%; 
+    margin-top: -20px;  
     color: white;
-    gap: 2rem; /* Ensure consistent space between text and image */
-    max-width: 100%; /* Ensure hero doesn't overflow horizontally */
-    box-sizing: border-box; /* Include padding in the width calculation */
-    height: calc(100vh - 80px - 45px); /* Ensure hero section fits inside the viewport considering both navbar and extra padding */
-    overflow: hidden; /* Ensure no content overflows */
+    gap: 2rem; 
+    max-width: 100%; 
+    box-sizing: border-box; 
+    height: calc(100vh - 80px - 45px); 
+    overflow: hidden; 
 }
 
 .hero-text {
     max-width: 500px;
-    padding-right: 20px; /* Ensure space between text and image */
+    padding-right: 20px; 
 }
 
 .hero-text h2 {
@@ -152,7 +171,7 @@
     border-radius: 15px;
 }
 
-/* Spacing between elements and responsive layout */
+
 @media (max-width: 1024px) {
     .hero {
         flex-direction: row;  /* Keep side-by-side layout */
@@ -205,14 +224,14 @@
 
     /* Hamburger Menu Icon - Visible only on smaller screens */
     .menu-icon {
-        display: block; /* Ensure it is visible in mobile view */
+        display: block; 
         font-size: 30px;
         background: none;
         border: none;
         color: white;
         cursor: pointer;
         z-index: 2000;
-        margin-top: 16px;
+        margin-top: 4px;
     }
 
     .nav-links {
@@ -242,7 +261,6 @@
 }
 
 @media (min-width: 769px) {
-    /* Ensure menu icon is hidden on larger screens */
     .menu-icon {
         display: none;
     }

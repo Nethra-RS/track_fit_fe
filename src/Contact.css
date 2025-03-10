@@ -1,4 +1,4 @@
-/* Contact Us Page Styles */
+
 .contact-container {
   display: flex;
   flex-direction: column;
@@ -9,8 +9,9 @@
   padding: 20px;
   text-align: center;
 }
-
-
+.contact-container .background{
+background-color: #071836;
+}
 .contact-title {
   font-size: 32px;
   font-weight: bold;
@@ -38,9 +39,13 @@
 }
 
 .contact-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   font-size: 50px;
   color: #01b1e3;
-  margin-bottom: 10px;
+  margin-bottom: 0.5rem;
+  margin: 0 auto;
 }
 
 .contact-card h4 {

@@ -62,7 +62,7 @@ const FAQ = () => {
     <div className="FAQ-container FAQP">
       <div className = "background"></div>
       <h2 className="logo1"><span className="trackfit1">trackfit</span><span className="dot1">.</span></h2>
-      <h2>Frequently Asked Questions</h2>
+      <h2 className="FAQH">Frequently Asked Questions</h2>
       {faqs.map((faq, index) => (
         <div className="faq" key={index}>
           <div className="faq-header" onClick={() => handleToggle(index)}>

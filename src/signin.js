@@ -1,9 +1,17 @@
 import React from "react";
-import { Link } from "react-router-dom"; 
+import { Link, useNavigate } from "react-router-dom";  // Added useNavigate import
 import "./signin.css";
 import image from "./image 1.png"; // Replace with your actual image path
 import image1 from "./image 2.png";
+
 const SignIn = () => {
+  const navigate = useNavigate(); // Adding the useNavigate hook
+
+  const handleSignIn = () => {
+    // You can add your authentication logic here if needed
+    navigate("/dashboard"); // Redirect to Dashboard on successful sign-in
+  };
+
   return (
     <div className="signin-container">
       <div className="background-new"></div>
@@ -26,7 +34,7 @@ const SignIn = () => {
             <label>Password</label>
             <input type="password" placeholder="Enter your password" />
           </div>
-          <button className="signin-btn">SIGN IN</button>
+          <button className="signin-btn" onClick={handleSignIn}>SIGN IN</button> {/* Updated this line */}
 
           {/* Separator */}
           <div className="separator">---or---</div>
@@ -53,6 +61,7 @@ const SignIn = () => {
 };
 
 export default SignIn;
+
 
 
 

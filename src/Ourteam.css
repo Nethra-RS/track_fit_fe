@@ -1,5 +1,5 @@
 body {
-  margin: 0; /* Removes any default margin on body */
+  margin: 0; 
 }
 
 .our-team-container {
@@ -41,6 +41,9 @@ body {
   font-size: 3rem;
   color: #f8a13e;
   margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .team-member h3 {
@@ -60,11 +63,11 @@ body {
   align-items: center;
   background-color: #f8a13e;
   color: white;
-  padding: 1rem 10%; /* Adds large padding on left & right */
+  padding: 1rem 10%; 
   margin: 3rem auto 0; /* Centers the footer */
-  width: 70%; /* Reduces width to make start & end visible */
+  width: 70%; 
   box-sizing: border-box;
-  border-radius: 10px; /* Optional for better design */
+  border-radius: 10px; 
 }
 
 .footer-container .left {
