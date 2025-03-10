@@ -16,7 +16,8 @@ body {
   z-index: -1;
 }
 
-.background-new::before, .background-new::after {
+.background-new::before,
+.background-new::after {
   content: "";
   position: absolute;
   width: 300px;
@@ -26,13 +27,13 @@ body {
 }
 
 .background-new::before {
-  background-color: #F8A13E;
+  background-color: #f8a13e;
   top: -100px;
   right: -100px;
 }
 
 .background-new::after {
-  background-color: #01B1E3;
+  background-color: #01b1e3;
   bottom: -100px;
   left: -100px;
 }
@@ -42,7 +43,7 @@ body {
   top: 20px;
   left: 80px;
   color: white;
-  font-family: 'Ubuntu', sans-serif;
+  font-family: "Ubuntu", sans-serif;
   font-size: 32px;
 }
 
@@ -103,7 +104,7 @@ body {
   align-items: center;
   justify-content: center;
   background: white;
-  font-family: 'Outfit', sans-serif;
+  font-family: "Outfit", sans-serif;
   height: 100%;
 }
 
@@ -142,7 +143,7 @@ body {
 .signin-btn {
   width: 100%;
   padding: 12px;
-  background: #F8A13E;
+  background: #f8a13e;
   border: none;
   color: white;
   font-size: 18px;
@@ -177,7 +178,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  font-family: 'Outfit', sans-serif;
+  font-family: "Outfit", sans-serif;
 }
 
 .google-btn img {
@@ -209,7 +210,8 @@ body {
     padding: 20px;
   }
 
-  .signin-box, .signin-image {
+  .signin-box,
+  .signin-image {
     margin: 0;
   }
 }
@@ -244,18 +246,21 @@ body {
     gap: 0.8vw;
   }
 
- 
   .logo1 {
-    position: static; 
-    margin-bottom: 20px; 
-    text-align: center; 
+    position: static;
+    margin-bottom: 20px;
+    text-align: center;
   }
 }
 
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
 
-
-
-
-
-
-
+.success-message {
+  color: green;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
