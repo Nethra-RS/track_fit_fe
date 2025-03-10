@@ -46,8 +46,6 @@ Ensure you have the following installed:
 trackfit_frontend/
 │── src/                    # Main source files
 │   ├── components/         # Reusable components
-│   ├── pages/              # Page-level components
-│   ├── styles/             # CSS & theme files
 │   ├── App.js              # Main application file
 │   ├── index.js            # Entry point
 │── public/                 # Static assets
