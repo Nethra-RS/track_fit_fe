@@ -378,3 +378,14 @@ h2 {
 .goalsTable th {
     padding-top: 18px;
 }
+
+.scrollable-form {
+  max-height: 700px;
+  max-width: 500px;
+  overflow-y: auto;
+  
+}
+
+.scrollable-form::-webkit-scrollbar {
+    display: none;
+  }

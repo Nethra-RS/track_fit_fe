@@ -19,18 +19,23 @@ const MyGoalsPage = () => {
   }, [location]);
   //----------------------------------------------
   
+  const [goal, setGoal] = useState({
+    type: "",
+    target: "",
+    outcome: "",
+    startDateValue: "",
+    endDateValue: "",
+    deadlineUnit: "",
+  });
 
-  
-  
   const handleChange = (e) => {
     setGoal({ ...goal, [e.target.name]: e.target.value });
-    };
-  
-  
+  };
+
   const handleBack = () => {
     navigate(previousPage);
   };
-  
+
   const handleCancel = () => {
     // If we're showing details, go back to edit mode
     if (showDetails) {
@@ -42,28 +47,34 @@ const MyGoalsPage = () => {
   };
 
   useEffect(() => {
-          // Disable scrolling when the component mounts
-          document.body.style.overflow = "hidden";
-  
-          // Re-enable scrolling when the component unmounts
-          return () => {
-              document.body.style.overflow = "auto";
-          };
-      }, []);
-  
-      const [showPopup, setShowPopup] = useState(false);
-      const [goal, setGoal] = useState({
-          target: "",
-          outcome: "",
-          startDateValue: "",
-          endDateValue: "",
-          deadlineUnit: "",
-      });
-  
-      const handleOpenPopup = () => setShowPopup(true);
-      const handleClosePopup = () => setShowPopup(false);
-  
-  
+    // Disable scrolling when the component mounts
+    document.body.style.overflow = "hidden";
+
+    // Re-enable scrolling when the component unmounts
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
+
+  const [showPopup, setShowPopup] = useState(false);
+
+  const handleOpenPopup = () => setShowPopup(true);
+  const handleClosePopup = () => setShowPopup(false);
+
+  const goalTypes = [
+    { value: "weight", label: "Weight Loss", metrics: ["Current weight vs. target weight", "BMI", "Calories burned per day/week", "Daily calorie intake", "Weight loss progress over time"] },
+    { value: "muscle", label: "Muscle Gain", metrics: ["Muscle mass percentage", "Weight lifted", "Number of repetitions and sets completed", "Strength improvement", "Protein intake tracking"] },
+    { value: "running", label: "Running", metrics: ["Target distance vs achieved distance", "Distance run", "Average pace", "Total time spent running", "Heart rate during run"] },
+    { value: "yoga", label: "Yoga/Flexibility", metrics: ["Time spent on yoga", "Number of yoga sessions completed per day", "Specific yoga poses achieved"] },
+    { value: "fitness", label: "General Fitness", metrics: ["Daily step count", "Active minutes per day", "Calories burned during active period", "Most active hour of the day"] },
+    { value: "cycling", label: "Cycling Performance", metrics: ["Distance covered", "Average speed", "Calories burned"] },
+    { value: "swimming", label: "Swimming Progress", metrics: ["Laps completed", "Stroke count", "Swimming time"] },
+    { value: "core", label: "Core Strength and Stability", metrics: ["Plank duration", "Sit-ups/crunches completed", "Core workout sessions per week"] },
+    { value: "mindfulness", label: "Mindfulness and Meditation", metrics: ["Meditation duration", "Heart rate variability", "Stress levels"] },
+  ];
+
+  const selectedGoalType = goalTypes.find(goalType => goalType.value === goal.type);
+
   return (
     <div className="min-h-screen">
       {/* Import components */}
@@ -97,16 +108,36 @@ const MyGoalsPage = () => {
                         <div className="popup-overlay" onClick={handleClosePopup}>
                             <div className="popup-box" onClick={(e) => e.stopPropagation()}>
                                 <h2 className="popupTitle">Add/Edit Goal</h2>
-                                <form>
+                                <form className="scrollable-form">
                                     {/* Type of Goal */}
                                     <label className="aboveType">Type of Goal</label>
-                                    <input className="box"
-                                        type="text"
-                                        name="goalType"
-                                        value={goal.type}
-                                        onChange={handleChange}
-                                        placeholder="Choose a goal"
-                                    />
+                                    <select
+                                      className="box"
+                                      name="type"
+                                      value={goal.type}
+                                      onChange={handleChange}
+                                    >
+                                      <option value="">Select a goal type</option>
+                                      {goalTypes.map((goalType) => (
+                                        <option key={goalType.value} value={goalType.value}>
+                                          {goalType.label}
+                                        </option>
+                                      ))}
+                                    </select>
+
+                                    {/* Conditionally render metrics based on selected goal type */}
+                                    {selectedGoalType && selectedGoalType.metrics.map((metric, index) => (
+                                      <div key={index}>
+                                        <label className="aboveType">{metric}</label>
+                                        <input className="box"
+                                          type="text"
+                                          name={`metric_${index}`}
+                                          value={goal[`metric_${index}`] || ""}
+                                          onChange={handleChange}
+                                          placeholder={`Enter ${metric.toLowerCase()}`}
+                                        />
+                                      </div>
+                                    ))}
 
                                     {/* Target Input */}
                                     <label className="aboveType">Target (Unit)</label>
@@ -139,19 +170,19 @@ const MyGoalsPage = () => {
                                             placeholder="Enter a value"
                                         />
                                         <div>
-                                            <select className="deadlineUnit" value={goal.deadlineUnit} onChange={handleChange}>
-                                              <option value="month">January</option>
-                                              <option value="month">February</option>
-                                              <option value="month">March</option>
-                                              <option value="month">April</option>
-                                              <option value="month">May</option>
-                                              <option value="month">June</option>
-                                              <option value="month">July</option>
-                                              <option value="month">August</option>
-                                              <option value="month">September</option>
-                                              <option value="month">October</option>
-                                              <option value="month">November</option>
-                                              <option value="month">December</option>
+                                            <select className="deadlineUnit" name="deadlineUnit" value={goal.deadlineUnit} onChange={handleChange}>
+                                              <option value="January">January</option>
+                                              <option value="February">February</option>
+                                              <option value="March">March</option>
+                                              <option value="April">April</option>
+                                              <option value="May">May</option>
+                                              <option value="June">June</option>
+                                              <option value="July">July</option>
+                                              <option value="August">August</option>
+                                              <option value="September">September</option>
+                                              <option value="October">October</option>
+                                              <option value="November">November</option>
+                                              <option value="December">December</option>
                                             </select>
                                         </div>
                                     </div>
@@ -166,19 +197,19 @@ const MyGoalsPage = () => {
                                           placeholder="Enter a value"
                                       />
                                       <div>
-                                        <select className="deadlineUnit" value={goal.deadlineUnit} onChange={handleChange}>
-                                          <option value="month">January</option>
-                                          <option value="month">February</option>
-                                          <option value="month">March</option>
-                                          <option value="month">April</option>
-                                          <option value="month">May</option>
-                                          <option value="month">June</option>
-                                          <option value="month">July</option>
-                                          <option value="month">August</option>
-                                          <option value="month">September</option>
-                                          <option value="month">October</option>
-                                          <option value="month">November</option>
-                                          <option value="month">December</option>
+                                        <select className="deadlineUnit" name="deadlineUnit" value={goal.deadlineUnit} onChange={handleChange}>
+                                          <option value="January">January</option>
+                                          <option value="February">February</option>
+                                          <option value="March">March</option>
+                                          <option value="April">April</option>
+                                          <option value="May">May</option>
+                                          <option value="June">June</option>
+                                          <option value="July">July</option>
+                                          <option value="August">August</option>
+                                          <option value="September">September</option>
+                                          <option value="October">October</option>
+                                          <option value="November">November</option>
+                                          <option value="December">December</option>
                                         </select>
                                       </div>
                                     </div>
