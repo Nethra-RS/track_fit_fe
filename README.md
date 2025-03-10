@@ -28,7 +28,7 @@ Ensure you have the following installed:
 ### Steps
 1. **Clone the repository**:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Nethra-RS/track_fit_fe/tree/Initial_pages
    cd trackfit_frontend
    ```
 2. **Install dependencies**:
