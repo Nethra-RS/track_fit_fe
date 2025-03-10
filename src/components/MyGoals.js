@@ -21,11 +21,10 @@ const MyGoalsPage = () => {
   
   const [goal, setGoal] = useState({
     type: "",
-    target: "",
-    outcome: "",
     startDateValue: "",
     endDateValue: "",
-    deadlineUnit: "",
+    startDateUnit: "",
+    endDateUnit: "",
   });
 
   const handleChange = (e) => {
@@ -139,26 +138,6 @@ const MyGoalsPage = () => {
                                       </div>
                                     ))}
 
-                                    {/* Target Input */}
-                                    <label className="aboveType">Target (Unit)</label>
-                                    <input className="box"
-                                        type="text"
-                                        name="target"
-                                        value={goal.target}
-                                        onChange={handleChange}
-                                        placeholder="Enter a value"
-                                    />
-
-                                    {/* Expected Outcome */}
-                                    <label className="aboveType">Current Progress</label>
-                                    <input className="boxOut"
-                                        type="int"
-                                        name="outcome"
-                                        value={goal.outcome}
-                                        onChange={handleChange}
-                                        placeholder="Enter a value"
-                                    ></input>
-
                                     {/* Deadline Inputs // Start date - End date */}
                                     <label className="aboveType">Start Date</label>
                                     <div className="deadline-container">
@@ -170,7 +149,7 @@ const MyGoalsPage = () => {
                                             placeholder="Enter a value"
                                         />
                                         <div>
-                                            <select className="deadlineUnit" name="deadlineUnit" value={goal.deadlineUnit} onChange={handleChange}>
+                                            <select className="deadlineUnit" name="startDateUnit" value={goal.startDateUnit} onChange={handleChange}>
                                               <option value="January">January</option>
                                               <option value="February">February</option>
                                               <option value="March">March</option>
@@ -197,7 +176,7 @@ const MyGoalsPage = () => {
                                           placeholder="Enter a value"
                                       />
                                       <div>
-                                        <select className="deadlineUnit" name="deadlineUnit" value={goal.deadlineUnit} onChange={handleChange}>
+                                        <select className="deadlineUnit" name="endDateUnit" value={goal.endDateUnit} onChange={handleChange}>
                                           <option value="January">January</option>
                                           <option value="February">February</option>
                                           <option value="March">March</option>
