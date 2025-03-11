@@ -26,7 +26,7 @@ const Sidebar = ({ show, handleClose }) => {
     { name: 'Home', path: '/' },
     { name: 'My Goals', path: '/goals' },
     { name: 'Fitness Planner', path: '/planner' },
-    { name: 'AI Tool', path: '/ai-tool' }
+    //{ name: 'AI Tool', path: '/ai-tool' }
   ];
   
   const bottomLinks = [
