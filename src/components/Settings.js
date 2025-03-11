@@ -295,7 +295,16 @@ const SettingsPage = () => {
                       <button className="text-red-600 hover:text-red-800 font-medium block">
                         Delete Account
                       </button>
-                      <button className="text-blue-600 hover:text-blue-800 font-medium block">
+                      <button className="text-blue-600 hover:text-blue-800 font-medium block"
+                       onClick={() => {
+                        // You might want to clear any auth state here if applicable
+                        // For example: localStorage.removeItem('userToken');
+                        // Or dispatch a logout action if using Redux
+                        
+                        // Navigate to signin page with success parameter
+                        window.location.href = '/signin?logoutSuccess=true';
+                      }}
+                      >
                         Logout
                       </button>
                     </div>

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Container, Navbar, Nav, Dropdown } from 'react-bootstrap';
 
 const Background = ({ sidebarWidth = 256 }) => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Determine if sidebar is collapsed (for mobile view)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -17,6 +18,15 @@ const Background = ({ sidebarWidth = 256 }) => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const handleLogout = () => {
+    // Here you would clear any authentication tokens, cookies, or local storage items
+    // For example:
+    // localStorage.removeItem('authToken');
+    
+    // Navigate to signin page with a query parameter for the success message
+    navigate('/signin?logoutSuccess=true');
+  };
 
   // Make sure this matches the actual sidebar width in Sidebar.js (which is 256px or 16rem)
   const effectiveSidebarWidth = isMobile ? 0 : sidebarWidth;
@@ -80,7 +90,7 @@ const Background = ({ sidebarWidth = 256 }) => {
                   <Dropdown.Item as={Link} to="/profile" state={{ from: location.pathname }}>
                     Profile
                   </Dropdown.Item>
-                  <Dropdown.Item>Logout</Dropdown.Item>
+                  <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
             </Nav>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./signin.css";
 import image from "./image 1.png";
@@ -10,6 +10,24 @@ const SignIn = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  // Check for logout success message on component mount
+  useEffect(() => {
+    // Check URL for logout success parameter
+    const queryParams = new URLSearchParams(window.location.search);
+    if (queryParams.get('logoutSuccess') === 'true') {
+      setSuccess('Logout successful!');
+      
+      // Remove the query parameter without page refresh
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+      
+      // Clear the success message after 5 seconds
+      setTimeout(() => {
+        setSuccess("");
+      }, 5000);
+    }
+  }, []);
 
   const handleSignIn = () => {
     setError(""); // Clear previous errors

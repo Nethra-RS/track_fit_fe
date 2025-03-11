@@ -23,7 +23,7 @@ const Sidebar = ({ show, handleClose }) => {
   }, []);
   
   const mainLinks = [
-    { name: 'Home', path: '/' },
+    { name: 'Home', path: '/Dashboard' },
     { name: 'My Goals', path: '/goals' },
     { name: 'Fitness Planner', path: '/planner' },
     //{ name: 'AI Tool', path: '/ai-tool' }
@@ -45,7 +45,7 @@ const Sidebar = ({ show, handleClose }) => {
       <Nav className="flex-column px-4 flex-grow">
         {mainLinks.map((item) => {
           const isActive = (currentPath === item.path) || 
-            (item.path === '/' && currentPath === '/') ||
+            (item.path === '/Dashboard' && currentPath === '/Dashboard') ||
             (item.path === '/planner' && currentPath === '/planner');
             
           return (
