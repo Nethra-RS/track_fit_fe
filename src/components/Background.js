@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Container, Navbar, Nav, Dropdown } from 'react-bootstrap';
 
 const Background = ({ sidebarWidth = 256 }) => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Determine if sidebar is collapsed (for mobile view)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -18,6 +19,15 @@ const Background = ({ sidebarWidth = 256 }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const handleLogout = () => {
+    // Here you would clear any authentication tokens, cookies, or local storage items
+    // For example:
+    // localStorage.removeItem('authToken');
+    
+    // Navigate to signin page with a query parameter for the success message
+    navigate('/signin?logoutSuccess=true');
+  };
+
   // Make sure this matches the actual sidebar width in Sidebar.js (which is 256px or 16rem)
   const effectiveSidebarWidth = isMobile ? 0 : sidebarWidth;
 
@@ -29,7 +39,7 @@ const Background = ({ sidebarWidth = 256 }) => {
         style={{ 
           left: `${effectiveSidebarWidth}px`,
           width: `calc(100% - ${effectiveSidebarWidth}px)`,
-          top: isMobile ? '64px' : '0', // Adjust for mobile header height
+          top: '0', // Set to 0 so it covers the entire height
         }}
       >
         {/* Orange Circle */}
@@ -55,14 +65,15 @@ const Background = ({ sidebarWidth = 256 }) => {
             width: `calc(100% - ${effectiveSidebarWidth}px)`,
             paddingLeft: '24px',
             paddingRight: '24px',
-            height: '64px' // Explicitly set height to match the margin-top in Dashboard.js
+            height: '48px', // Further reduced to 48px
+            marginTop: '0' // Ensure there's no margin at the top
           }}
         >
           <Container fluid className="d-flex justify-content-end p-0">
             <Nav className="align-items-center">
               {/* Notification Icon */}
-              <Nav.Link className="text-white p-2">
-                <Bell size={24} />
+              <Nav.Link className="text-white p-1"> {/* Reduced padding */}
+                <Bell size={20} /> {/* Slightly smaller icon */}
               </Nav.Link>
 
               {/* User Dropdown using React Bootstrap */}
@@ -70,16 +81,16 @@ const Background = ({ sidebarWidth = 256 }) => {
                 <Dropdown.Toggle 
                   variant="light" 
                   id="user-dropdown"
-                  className="rounded-pill px-4 py-2 d-flex align-items-center border-0 ml-2"
+                  className="rounded-pill px-3 py-1 d-flex align-items-center border-0 ml-2" // Further reduced padding
                 >
-                  <span className="mr-2 text-[#071836]">First, Last Name</span>
+                  <span className="mr-2 text-[#071836] text-sm">First, Last Name</span> {/* Smaller text */}
                 </Dropdown.Toggle>
 
-                <Dropdown.Menu align="end" className="mt-2 rounded-lg shadow-lg">
+                <Dropdown.Menu align="end" className="mt-1 rounded-lg shadow-lg">
                   <Dropdown.Item as={Link} to="/profile" state={{ from: location.pathname }}>
                     Profile
                   </Dropdown.Item>
-                  <Dropdown.Item>Logout</Dropdown.Item>
+                  <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
             </Nav>

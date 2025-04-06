@@ -8,6 +8,8 @@ import ResetPasswordConfirmation from "./RequestConfirmation";
 import Contact from "./Contact";
 import FAQ from "./FAQ";
 import TOS from "./TOS";
+import About from "./components/About";
+import Team from "./components/OurTeam";
 import Support from "./Support";
 import ReportBugs from "./ReportBugs";
 import Dashboard from "./components/Dashboard";
@@ -47,8 +49,8 @@ const App = () => {
         <Route path="/planner" element={<FitnessPlanner />} />
         <Route path="/ai-tool" element={<div>AI Tool</div>} />
         <Route path="/settings" element={<Settings />} />
-        <Route path="/about" element={<div>About</div>} />
-        <Route path="/team" element={<div>Team</div>} />
+        <Route path="/about" element={<About/>} />
+        <Route path="/team" element={<Team />} />
         <Route path="/profile" element={<Profile />} />
 
         <Route path="/goals/:id" element={<GoalDescription />} />

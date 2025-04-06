@@ -1,17 +1,28 @@
 import React from 'react';
 import { Bell, Menu } from 'lucide-react';
 import { Navbar, Container, Dropdown } from 'react-bootstrap';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const MobileHeader = ({ toggleSidebar }) => {
+  const navigate = useNavigate();
+  
+  const handleLogout = () => {
+    // Here you would clear any authentication tokens, cookies, or local storage items
+    // For example:
+    // localStorage.removeItem('authToken');
+    
+    // Navigate to signin page with a query parameter for the success message
+    navigate('/signin?logoutSuccess=true');
+  };
+
   return (
     <Navbar 
-      className="d-md-none bg-[#F8A13E] position-fixed top-0 w-100 z-40"
+      className="d-md-none bg-[#F8A13E] position-fixed top-0 start-0 w-100 z-40 p-0 m-0"
       style={{ 
         height: '64px',
       }}
     >
-      <Container fluid className="d-flex justify-content-between align-items-center px-3">
+      <Container fluid className="d-flex justify-content-between align-items-center px-3 h-100">
         {/* Menu Button */}
         <button
           onClick={toggleSidebar}
@@ -47,7 +58,7 @@ const MobileHeader = ({ toggleSidebar }) => {
               <Dropdown.Item as={Link} to="/profile">
                 Profile
               </Dropdown.Item>
-              <Dropdown.Item>Logout</Dropdown.Item>
+              <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>
         </div>
