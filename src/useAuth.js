@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
+import { signIn, getSession } from "next-auth/react";
 
-const FRONTEND_URL = window.location.origin;
+//const FRONTEND_URL = window.location.origin;
 
 export function useAuth() {
   const [user, setUser] = useState(null);
@@ -41,22 +42,26 @@ export function useAuth() {
   }, []);
 
   const login = async (email, password) => {
-    console.log("🔐 Logging in:", email);
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ email, password }),
-    });
-
-    const data = await res.json();
-    if (res.ok) {
-      window.location.href = `${FRONTEND_URL}/dashboard`;
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+  
+      if (result?.error) {
+        return { success: false, message: result.error || "Login failed" };
+      }
+  
       return { success: true };
+      
+    } catch (err) {
+      return { success: false, message: err.message || "Unexpected error" };
     }
-
-    return { success: false, message: data.message || "Login failed" };
   };
+  
+  
+  
 
   const register = async (name, email, password) => {
     try {

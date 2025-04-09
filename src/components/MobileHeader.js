@@ -1,22 +1,44 @@
 import React from 'react';
+import{ useState, useEffect } from 'react';
 import { Bell, Menu } from 'lucide-react';
 import { Navbar, Container, Dropdown } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../useAuth';
-
 const MobileHeader = ({ toggleSidebar }) => {
   const navigate = useNavigate();
+  const [userName, setUserName] = useState("");
+  useEffect(() => {
+      const fetchSession = async () => {
+        try {
+          const res = await fetch("/api/auth/session", {
+            credentials: "include",
+          });
+          const data = await res.json();
+          console.log("🧠 Session Data:", data); // 👈 log what you get
+    
+          if (data?.user?.name) {
+            setUserName(data.user.name);
+          } else {
+            console.log("⚠️ Name not found in session");
+          }
+        } catch (err) {
+          console.error("❌ Failed to fetch session:", err);
+        }
+      };
+    
+      fetchSession();
   
-  const { logout } = useAuth(); 
+    }, []);
+  
+  const { logout } = useAuth();
     const handleLogout = () => {
       console.log("🧪 Logout button clicked");
       logout();
     };
-
   return (
-    <Navbar 
+    <Navbar
       className="d-md-none bg-[#F8A13E] position-fixed top-0 start-0 w-100 z-40 p-0 m-0"
-      style={{ 
+      style={{
         height: '64px',
       }}
     >
@@ -49,7 +71,7 @@ const MobileHeader = ({ toggleSidebar }) => {
               className="rounded-pill d-flex align-items-center border-0 py-1 px-2 ms-1"
               size="sm"
             >
-              <span className="text-[#071836] text-sm">First, Last</span>
+              <span className="text-[#071836] text-sm">{userName || "Loading..."}</span>
             </Dropdown.Toggle>
 
             <Dropdown.Menu align="end" className="mt-2 rounded-lg shadow-lg">
@@ -64,5 +86,4 @@ const MobileHeader = ({ toggleSidebar }) => {
     </Navbar>
   );
 };
-
 export default MobileHeader;

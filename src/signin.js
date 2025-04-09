@@ -44,10 +44,10 @@ const SignIn = () => {
     try {
       const result = await login(email, password);
   
-      if (result?.error) {
-        setError("Invalid email or password.");
+      if (!result.success) {
+        setError(result.message || "Invalid email or password.");
       } else {
-        await fetchSession(); // ✅ update local session state from backend
+        await fetchSession();
         setSuccess("Login successful!");
         navigate("/dashboard");
       }
