@@ -1,19 +1,18 @@
 import React from 'react';
 import { Bell, Menu } from 'lucide-react';
 import { Navbar, Container, Dropdown } from 'react-bootstrap';
+import { Link, useLocation } from 'react-router-dom';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../useAuth';
 
 const MobileHeader = ({ toggleSidebar }) => {
   const navigate = useNavigate();
   
-  const handleLogout = () => {
-    // Here you would clear any authentication tokens, cookies, or local storage items
-    // For example:
-    // localStorage.removeItem('authToken');
-    
-    // Navigate to signin page with a query parameter for the success message
-    navigate('/signin?logoutSuccess=true');
-  };
+  const { logout } = useAuth(); 
+    const handleLogout = () => {
+      console.log("🧪 Logout button clicked");
+      logout();
+    };
 
   return (
     <Navbar 
