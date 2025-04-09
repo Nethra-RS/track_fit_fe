@@ -13,15 +13,6 @@ const SignIn = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-  const handleSignIn = () => {
-    setError(""); // Clear previous errors
-    setSuccess(""); // Clear previous success messages
-
-=======
-=======
->>>>>>> Stashed changes
   useEffect(() => {
       const params = new URLSearchParams(window.location.search);
       const isLogout = params.get("logoutSuccess") === "true";
@@ -45,10 +36,6 @@ const SignIn = () => {
     e.preventDefault();
     setError("");
   
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
     if (!email || !password) {
       setError("Email and password are required");
       return;
