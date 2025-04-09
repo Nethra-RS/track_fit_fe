@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Container, Navbar, Nav, Dropdown } from 'react-bootstrap';
+import { useAuth } from '../useAuth';
 
 const Background = ({ sidebarWidth = 256 }) => {
   const location = useLocation();
@@ -19,15 +20,11 @@ const Background = ({ sidebarWidth = 256 }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const { logout } = useAuth(); 
   const handleLogout = () => {
-    // Here you would clear any authentication tokens, cookies, or local storage items
-    // For example:
-    // localStorage.removeItem('authToken');
-    
-    // Navigate to signin page with a query parameter for the success message
-    navigate('/signin?logoutSuccess=true');
+    console.log("🧪 Logout button clicked");
+    logout();
   };
-
   // Make sure this matches the actual sidebar width in Sidebar.js (which is 256px or 16rem)
   const effectiveSidebarWidth = isMobile ? 0 : sidebarWidth;
 

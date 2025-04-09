@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useAuth } from "./useAuth";
 import "./signup.css";
 import image from "./images.png"; 
 import image1 from "./image 2.png";
@@ -14,9 +15,15 @@ const SignUp = () => {
   const [age, setAge] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
+  const { register } = useAuth();
 
-  const handleSignUp = () => {
-    setShowDialog(true);
+  const handleSignUp = async () => {
+    const result = await register(firstName, email, password);
+    if (result.success) {
+      setShowDialog(true); // proceed to profile setup
+    } else {
+      alert(result.message || "Registration failed");
+    }
   };
 
   const handleNext = () => {
