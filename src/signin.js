@@ -13,10 +13,6 @@ const SignIn = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const handleSignIn = () => {
-    setError(""); // Clear previous errors
-    setSuccess(""); // Clear previous success messages
-
   useEffect(() => {
       const params = new URLSearchParams(window.location.search);
       const isLogout = params.get("logoutSuccess") === "true";
