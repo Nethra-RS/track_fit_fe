@@ -1,9 +1,24 @@
 import React from 'react';
 import { Bell, Menu } from 'lucide-react';
 import { Navbar, Container, Dropdown } from 'react-bootstrap';
+<<<<<<< Updated upstream
 import { Link, useLocation } from 'react-router-dom';
 
 const MobileHeader = ({ toggleSidebar }) => {
+=======
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../useAuth';
+
+const MobileHeader = ({ toggleSidebar }) => {
+  const navigate = useNavigate();
+  
+  const { logout } = useAuth(); 
+    const handleLogout = () => {
+      console.log("🧪 Logout button clicked");
+      logout();
+    };
+
+>>>>>>> Stashed changes
   return (
     <Navbar 
       className="d-md-none bg-[#F8A13E] position-fixed top-0 w-100 z-40"

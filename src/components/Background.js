@@ -2,9 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Container, Navbar, Nav, Dropdown } from 'react-bootstrap';
+import { useAuth } from '../useAuth';
 
 const Background = ({ sidebarWidth = 256 }) => {
   const location = useLocation();
+<<<<<<< Updated upstream
+=======
+  const navigate = useNavigate();
+  const [userName, setUserName] = useState("");
+
+>>>>>>> Stashed changes
 
   // Determine if sidebar is collapsed (for mobile view)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -16,8 +23,41 @@ const Background = ({ sidebarWidth = 256 }) => {
     
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
+  }, []);
+  
+  useEffect(() => {
+    const fetchSession = async () => {
+      try {
+        const res = await fetch("/api/auth/session", {
+          credentials: "include",
+        });
+        const data = await res.json();
+        console.log("🧠 Session Data:", data); // 👈 log what you get
+  
+        if (data?.user?.name) {
+          setUserName(data.user.name);
+        } else {
+          console.log("⚠️ Name not found in session");
+        }
+      } catch (err) {
+        console.error("❌ Failed to fetch session:", err);
+      }
+    };
+  
+    fetchSession();
+  }, []);
+  
+  
+
+<<<<<<< Updated upstream
+=======
+  const { logout } = useAuth(); 
+  const handleLogout = () => {
+    console.log("🧪 Logout button clicked");
+    logout();
+  };
+>>>>>>> Stashed changes
   // Make sure this matches the actual sidebar width in Sidebar.js (which is 256px or 16rem)
   const effectiveSidebarWidth = isMobile ? 0 : sidebarWidth;
 
@@ -73,7 +113,7 @@ const Background = ({ sidebarWidth = 256 }) => {
                   id="user-dropdown"
                   className="rounded-pill px-3 py-1 d-flex align-items-center border-0 ml-2" // Further reduced padding
                 >
-                  <span className="mr-2 text-[#071836] text-sm">First, Last Name</span> {/* Smaller text */}
+                  <span className="mr-2 text-[#071836] text-sm">{userName || "Loading..."}</span> {/* Smaller text */}
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu align="end" className="mt-1 rounded-lg shadow-lg">
