@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Container, Navbar, Nav, Dropdown } from 'react-bootstrap';
 import { useAuth } from '../useAuth';
 
@@ -114,7 +114,7 @@ const Background = ({ sidebarWidth = 256 }) => {
                   <Dropdown.Item as={Link} to="/profile" state={{ from: location.pathname }}>
                     Profile
                   </Dropdown.Item>
-                  <Dropdown.Item>Logout</Dropdown.Item>
+                  <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
             </Nav>
