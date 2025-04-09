@@ -1,0 +1,117 @@
+.FAQ-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 40px 20px;
+  font-family: 'Outfit', sans-serif;
+  text-align: center;
+}
+.FAQ-container .background{
+  background-color: #071836;
+  z-index: -1;
+}
+
+.FAQ-container .FAQH {
+  font-size: 32px;
+  font-weight: bold;
+  color: #f8a13e;
+  margin-bottom: 20px;
+}
+
+.faq {
+  background: rgba(255, 255, 255, 0.1);
+  margin: 10px 0;
+  border-radius: 5px;
+  padding: 10px;
+  width: 100%;
+  max-width: 800px;
+  cursor: pointer;
+}
+
+.faq-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.faq-header h4 {
+  color: #f8a13e;
+  margin: 0;
+}
+
+.faq p {
+  color: white;
+  padding: 10px;
+  margin: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+}
+
+.arrow {
+  font-size: 20px;
+  color: #f8a13e;
+  transition: transform 0.3s ease-in-out;
+}
+
+.arrow.rotate {
+  transform: rotate(180deg);
+}
+
+/* Responsive Design */
+/* Responsive Design */
+@media (max-width: 768px) {
+  .FAQ-container {
+    display: flex;
+    flex-direction: column; /* Stack elements vertically */
+    align-items: center;
+    justify-content: flex-start;
+    padding: 20px;
+    padding-top: 15vh; /* Ensure enough space at the top */
+  }
+
+  /* Ensure Logo is at the top with space below */
+  .FAQ-container .logo1 {
+    font-size: 6vw;
+    margin-bottom: 4vh; /* Increased spacing to prevent overlap */
+  }
+
+  /* FAQ Heading with space below */
+  .FAQ-container h2 {
+    font-size: 6vw;
+    margin-bottom: 4vh; /* Ensure enough space between elements */
+  }
+
+  /* FAQ Questions */
+  .faq {
+    padding: 15px;
+    width: 90%; /* Slightly reduced width to avoid overflowing */
+    margin-bottom: 3vh; /* Added spacing between FAQ items */
+  }
+
+  .faq-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .faq-header h4 {
+    font-size: 4vw;
+  }
+
+  .arrow {
+    font-size: 6vw;
+  }
+
+  .faq p {
+    font-size: 3.5vw;
+  }
+}
+
+
+
+
+
+
+
+  

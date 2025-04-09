@@ -1,0 +1,113 @@
+/* Container styling */
+.resend-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 20px;
+}
+
+/* Trackfit logo */
+.logo1 {
+  font-size: 32px;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 20px;
+}
+
+/* Reset password box */
+.resend-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px; /* Ensuring mobile-friendly width */
+}
+
+/* Form styling */
+.resend-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.reset {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: black;
+  margin-bottom: 15px;
+}
+
+.resend-form p {
+  font-size: 16px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.resend,
+.goback-btn {
+  background-color: #f8a13e;
+  border: none;
+  color: white;
+  padding: 12px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.resend:hover,
+.goback-btn:hover {
+  background-color: #e28b2c;
+}
+
+.resend a,
+.goback-btn a {
+  color: white;
+  text-decoration: none;
+}
+
+/* Image Styling */
+.resend-image {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.resend-image img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .resend-box {
+    width: 90%;
+    padding: 20px;
+  }
+
+  .reset {
+    font-size: 20px;
+  }
+
+  .resend-form p {
+    font-size: 14px;
+  }
+
+  .resend,
+  .goback-btn {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .resend-image {
+    display: none; /* Hide image on mobile */
+  }
+}

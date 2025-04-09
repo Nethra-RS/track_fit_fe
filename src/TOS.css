@@ -1,0 +1,95 @@
+.tos-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* Ensures stacking starts from the top */
+  padding: 40px 20px;
+  font-family: 'Outfit', sans-serif;
+  text-align: center;
+}
+
+/* Terms of Service Title */
+.tos-title {
+  font-size: 32px;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 20px;
+}
+
+/* Terms Content Box */
+.tos-content {
+  max-width: 900px;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Section Headings */
+.tos-content h3 {
+  font-size: 20px;
+  font-weight: bold;
+  color: #01b1e3;
+  margin-top: 20px;
+}
+
+/* Paragraph Text */
+.tos-content p {
+  font-size: 16px;
+  color: #ffffff;
+  margin-bottom: 10px;
+}
+
+/* List Styling */
+.tos-content ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.tos-content ul li {
+  background: white;
+  color: black;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 5px;
+}
+.TOC a {
+  color: #f8a13e; /* Orange color */
+  text-decoration: none; /* Removes underline */
+}
+
+.TOC a:hover {
+  text-decoration: underline; /* Adds underline on hover */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .tos-container {
+    display: flex;
+    flex-direction: column; /* Stack elements vertically */
+    justify-content: flex-start; /* Ensure proper stacking */
+    align-items: center;
+    padding: 20px;
+  }
+
+  .tos-title {
+    font-size: 5vw;
+    margin-bottom: 4vw;
+  }
+
+  .tos-content {
+    padding: 15px;
+    width: 90%;
+  }
+
+  .tos-content h3 {
+    font-size: 4.5vw;
+  }
+
+  .tos-content p,
+  .tos-content ul li {
+    font-size: 4vw;
+  }
+}
+
