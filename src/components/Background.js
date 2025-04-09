@@ -11,6 +11,9 @@ const Background = ({ sidebarWidth = 256 }) => {
   const navigate = useNavigate();
   const [userName, setUserName] = useState("");
 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
   // Determine if sidebar is collapsed (for mobile view)
@@ -51,12 +54,18 @@ const Background = ({ sidebarWidth = 256 }) => {
   
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
   const { logout } = useAuth(); 
   const handleLogout = () => {
     console.log("🧪 Logout button clicked");
     logout();
   };
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
   // Make sure this matches the actual sidebar width in Sidebar.js (which is 256px or 16rem)
   const effectiveSidebarWidth = isMobile ? 0 : sidebarWidth;
