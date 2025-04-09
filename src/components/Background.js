@@ -43,6 +43,7 @@ const Background = ({ sidebarWidth = 256 }) => {
     };
   
     fetchSession();
+
   }, []);
   
   
