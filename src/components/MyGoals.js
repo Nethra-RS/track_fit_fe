@@ -6,6 +6,7 @@ import { Edit, Trash2, Info } from 'lucide-react';
 import { useNavigate, useLocation } from "react-router-dom";
 import { Container, Row, Col, Button, Card } from 'react-bootstrap';
 
+// Success merge
 // API INTEGRATION -----------------------------------------------------------
 // Fetch user goals from the backend
 async function fetchUserGoals(sessionToken) {
