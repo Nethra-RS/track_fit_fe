@@ -6,77 +6,8 @@ import { Edit, Trash2, Info } from 'lucide-react';
 import { useNavigate, useLocation } from "react-router-dom";
 import { Container, Row, Col, Button, Card } from 'react-bootstrap';
 
-// Success merge
-// API INTEGRATION -----------------------------------------------------------
-// Fetch user goals from the backend
-async function fetchUserGoals(sessionToken) {
-  try {
-    const response = await fetch('http://localhost:3000/api/goals', {
-      method: 'GET',
-      headers: {
-        'Cookie': `next-auth.session-token=${sessionToken}`
-      },
-      credentials: 'include'
-    });
-
-    if (!response.ok) throw new Error('Failed to fetch user goals');
-
-    const data = await response.json();
-    console.log('User Goals:', data);
-    return data;
-  } catch (error) {
-    console.error('Error fetching user goals:', error);
-    return [];
-  }
-}
-
-// Fetch goal types from the backend
-async function fetchGoalTypes(sessionToken) {
-  try {
-    const response = await fetch('http://localhost:3000/api/goals/config', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': `next-auth.session-token=${sessionToken}`,
-      },
-      credentials: 'include',
-    });
-
-    if (!response.ok) throw new Error('Failed to fetch goal types');
-
-    const data = await response.json();
-    console.log('Goal Types:', data.goals);
-    return data.goals;
-  } catch (error) {
-    console.error('Error fetching goal types:', error);
-    return [];
-  }
-}
-
-// Create a new goal in the backend
-async function createGoal(sessionToken, goalData) {
-  try {
-    const response = await fetch('http://localhost:3000/api/goals/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': `next-auth.session-token=${sessionToken}`
-      },
-      credentials: 'include',
-      body: JSON.stringify(goalData)
-    });
-
-    if (!response.ok) throw new Error('Failed to create goal');
-
-    const data = await response.json();
-    console.log('Created Goal:', data);
-    return data;
-  } catch (error) {
-    console.error('Error creating goal:', error);
-  }
-}
-
-// ----------------------------------------------------------------------------
+import { fetchUserGoals, fetchGoalTypes, createGoal } from "../goalAPI.js"; // Import API functions
+import { type } from "@testing-library/user-event/dist/type/index.js";
 
 // MyGoalsPage Component
 const MyGoalsPage = () => {
@@ -94,39 +25,67 @@ const MyGoalsPage = () => {
   const [goalTypes, setGoalTypes] = useState([]); // Stores goal types from the API
   const [selectedMetrics, setSelectedMetrics] = useState([]); // Stores metrics for the selected goal
 
+
+  function getCookie(name) {
+    const cookieStr = document.cookie;
+    const cookies = cookieStr.split(';');
+  
+    for (let cookie of cookies) {
+      const [key, value] = cookie.trim().split('=');
+      if (key === name) return decodeURIComponent(value);
+    }
+  
+    return null;
+  } // Currently does not work.
+  
   // Handle goal type selection
   const handleGoalTypeChange = (e) => {
     const selectedGoalId = e.target.value;
     const selectedGoal = goalTypes.find((goal) => goal.goal_type_id === selectedGoalId);
 
-    setSelectedGoalType(selectedGoalId);
-    setSelectedMetrics(selectedGoal ? selectedGoal.metrics : []);
+    setSelectedGoalType(selectedGoalId); // Store the goal_type_id
+    setSelectedMetrics(selectedGoal ? selectedGoal.metrics : []); // Update the metrics for the selected goal
+
+    // Update the goal_name in the goal state
+    setGoal((prevGoal) => ({
+      ...prevGoal,
+      goal_name: selectedGoal ? selectedGoal.goal_name : "", // Set the goal_name
+    }));
   };
 
   // Handle metric input changes
-  const handleMetricInputChange = (metric, value) => {
+  const handleMetricInputChange = (metricName, field, value) => {
     setMetricInputs((prev) => ({
       ...prev,
-      [metric]: value,
+      [metricName]: {
+        ...prev[metricName],
+        [field]: value, // Update either "current" or "target" field
+      },
     }));
   };
 
   // Fetch user goals when the page loads
-  useEffect(() => {
-    const sessionToken = "your-session-token"; // Replace with the actual user session token
+  useEffect(() => { // Make sure to manually set the session token.
+    const sessionToken = "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..l1TNg-lew4CMW1Is.Pr9QNy8kJu-gl5k0Kh-95_aSuwj50IApRoWVwZOKXbpE1TbjgCrLRLOfgZT2ZjOvNKBoOPRBvwrfviUpsdMUxycXUmubQQJJE--ASikZog8wvRzJhdZgiEMGl2E_0qxlVNi7Is0xVzQW4uiAUglGDA_myAsyKUl2Xok2WdTPBD2VNj_lFz8JPVBe9F1JLMjXPyeA7sIlWD7EmLrcrftHK5vBR2T7GXJx3pkRCXUn4Nf58RSML5hsNxzl5rXMbLEiB73DbHMBCskQroHEdiUA6lIHRBV2BfmtKYXGbSok1igWiRENiKFrXIo6mFDGVIvxtsb-zVmPvjmxtPOyp-IIRgyeoycXbO2ZIMglOErYIcomQrNSD6jSid6rbNQlo6tIGAePw3wSm1tDXmtn.z9qVSLJddWqjUZrQH7mBjA";
     const loadGoals = async () => {
       const fetchedGoals = await fetchUserGoals(sessionToken);
-      setGoals(fetchedGoals);
+      console.log("Fetched Goals:", fetchedGoals);
+      if (!fetchedGoals.goals || fetchedGoals.goals.length === 0) {
+        console.log("No goals found or failed to fetch goals");
+        return;
+      }
+
+      setGoals(fetchedGoals.goals);
     };
 
     loadGoals();
   }, []);
 
   // Fetch goal types when the page loads
-  useEffect(() => {
-    const sessionToken = "your-session-token"; // Replace with the actual session token
+  useEffect(() => { // Make sure to manually set the url cookie.
+    const urlCookie = "http%3A%2F%2Flocalhost%3A3000%2Fdashboard";
     const loadGoalTypes = async () => {
-      const fetchedGoalTypes = await fetchGoalTypes(sessionToken);
+      const fetchedGoalTypes = await fetchGoalTypes(urlCookie);
       setGoalTypes(fetchedGoalTypes);
     };
 
@@ -161,48 +120,105 @@ const MyGoalsPage = () => {
 
   const [showPopup, setShowPopup] = useState(false);
   const [goal, setGoal] = useState({
-    type: "",
-    currentValue: "",
-    target: "",
-    startDate: "",
-    endDate: "",
+    goal_name: "", // The name of the goal
+    metrics: [], // Array of metrics (e.g., current and target values)
+    start_date: "", // Start date of the goal
+    end_date: "", // End date of the goal
   });
 
   const handleChange = (e) => {
-    setGoal({ ...goal, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setGoal((prevGoal) => ({
+      ...prevGoal,
+      [name]: value, // Dynamically update the field based on the input's name
+    }));
   };
 
-  const handleOpenPopup = () => setShowPopup(true);
+  const handleOpenPopup = async () => { // Make sure to manually set the session token.
+    const sessionToken = "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..l1TNg-lew4CMW1Is.Pr9QNy8kJu-gl5k0Kh-95_aSuwj50IApRoWVwZOKXbpE1TbjgCrLRLOfgZT2ZjOvNKBoOPRBvwrfviUpsdMUxycXUmubQQJJE--ASikZog8wvRzJhdZgiEMGl2E_0qxlVNi7Is0xVzQW4uiAUglGDA_myAsyKUl2Xok2WdTPBD2VNj_lFz8JPVBe9F1JLMjXPyeA7sIlWD7EmLrcrftHK5vBR2T7GXJx3pkRCXUn4Nf58RSML5hsNxzl5rXMbLEiB73DbHMBCskQroHEdiUA6lIHRBV2BfmtKYXGbSok1igWiRENiKFrXIo6mFDGVIvxtsb-zVmPvjmxtPOyp-IIRgyeoycXbO2ZIMglOErYIcomQrNSD6jSid6rbNQlo6tIGAePw3wSm1tDXmtn.z9qVSLJddWqjUZrQH7mBjA";
+    if (!sessionToken) {
+      console.error("Session token not found in cookies");
+      return;
+    }
+  
+    try {
+      const fetchedGoalTypes = await fetchGoalTypes(sessionToken); // Fetch goal types
+      setGoalTypes(fetchedGoalTypes); // Update the state with fetched goal types
+      setShowPopup(true); // Open the modal
+    } catch (error) {
+      console.error("Error fetching goal types:", error);
+    }
+  };
+
   const handleClosePopup = () => {
     setShowPopup(false);
     // Reset form
     setGoal({
-      type: "",
-      currentValue: "",
-      target: "",
-      startDate: "",
-      endDate: "",
+      goal_name: "",
+      metrics: [],
+      start_date: "",
+      end_date: "",
     });
+    setMetricInputs({}); // Reset metric inputs
   };
 
-  const handleAddGoal = (e) => {
+  const handleAddGoal = async (e) => {
     e.preventDefault();
-    const sessionToken = "your-session-token"; // Replace with actual session token
-
+  
+    // Dynamically get the session token
+    const sessionToken = "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..cHFWuT-ql7Tx0yMn.p2sCnpQ7pj2qr1LooMxVNo3mtjAIigVcjofRM83zR5W4Bbwb8oKKHck5HaOBHqVeV_4PtcpllW7r5I-Tv3hhTdSXd2r0fipPyM0ok3_87vwfsvP6aFpkKfKWccbEDR-bR0z9Kzi45IRwDoEY1L_WZLuAhVVaW0fmljCVtCipGgRBO3smqFHZMAdzLH-OkxgQNkPwfukeoaU7CJlCCHyyOKn58T_WElh5DC3zNLLe_cQ0kf9xzBLvEhxaz4qA0utPjdmLd9V8grUcVuUek5m-h1d2F7NNQA6agpAbWwZJ8u0CSyvlWWwGV-MyDVI9-0pcp_mtFMw6xOo1PEUQI6pV5-WJI27mVzTWDKdO0aJ_PFIUPJ2DEWM7Sktxzo6GKa2Foznlu7D3iV7qUI_4.ZIXvBlP4paEfl4m-zbGEbg"; // Replace with dynamic token retrieval
+    if (!sessionToken) {
+      console.error("Session token not found in cookies");
+      return;
+    }
+  
+    // Construct the metrics array from metricInputs
+    const metricsArray = selectedMetrics.map((metric) => ({
+      metrics_name: metric.metric_name, // Metric name
+      current: metricInputs[metric.metric_name]?.current || "", // Current value
+      target: metricInputs[metric.metric_name]?.target || "", // Target value
+    }));
+  
+    // Construct the newGoal object
     const newGoal = {
-      type: selectedGoalType,
-      metrics: Object.entries(metricInputs).map(([metric, value]) => ({
-        metric_name: metric,
-        value,
-      })),
-      target: goal.target,
-      startDate: goal.startDate,
-      endDate: goal.endDate,
+      goal_name: goal.goal_name, // Ensure goal_name is included
+      metrics: metricsArray, // The metrics array
+      start_date: goal.start_date, // Start date from the modal
+      end_date: goal.end_date, // End date from the modal
+      current_date: new Date().toISOString().split("T")[0], // Current date in YYYY-MM-DD format
     };
+  
+    console.log("New Goal Data:", newGoal); // Log the new goal data for debugging
+  
+    try {
+      // Call the createGoal API function
+      const createdGoal = await createGoal(sessionToken, newGoal);
+      console.log("Created Goal:", createdGoal);
+  
+      /*if (createdGoal) {
+        // Update the goals state with the newly created goal
+        setGoals([...goals, createdGoal]);
+  
+        // Reset the form and close the modal
+        setGoal({
+          goal_name: "",
+          metrics: [],
+          start_date: "",
+          end_date: "",
+        });
+        setMetricInputs({});
+        handleClosePopup();
+      }*/
 
-    setGoals([...goals, newGoal]);
-    handleClosePopup();
+      if (createdGoal) {
+        // Refresh so that goal is readly available in the table.
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Error creating goal:", error);
+    }
   };
+  
 
   const handleDeleteGoal = (index) => {
     const updatedGoals = [...goals];
@@ -276,37 +292,37 @@ const MyGoalsPage = () => {
                     </thead>
                     <tbody>
                       {goals.map((goalItem, index) => {
-                        // Calculate deadline in days
-                        const startDate = new Date(goalItem.startDate);
-                        const endDate = new Date(goalItem.endDate);
+                        console.log("Goal Item:", goalItem); // Log each goal item for debugging
+                        const startDate = new Date(goalItem.start_date);
+                        const endDate = new Date(goalItem.end_date);
                         const deadlineDays = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
-                        
+
                         return (
                           <tr key={index}>
                             <td className="py-3 ps-4">{index + 1}</td>
+                            <td className="py-3">{goalItem.goal_name || "N/A"}</td>
                             <td className="py-3">
-                              <a
-                                href="#"
-                                className="text-decoration-none"
-                                style={{ color: '#007bff' }}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  navigate(`/goals/${index + 1}`, {
-                                    state: { goal: goalItem }
-                                  });
-                                }}
-                              >
-                                {goalItem.type}
-                              </a>
+                              {goalItem.metrics && goalItem.metrics.length > 0
+                                ? goalItem.metrics.map((metric) => (
+                                    <div key={metric.metrics_name}>
+                                      {metric.metrics_name}{metric.metric_name}: {metric.current}
+                                    </div>
+                                  ))
+                                : "N/A"}
                             </td>
-                            <td className="py-3">{goalItem.currentValue}</td>
-                            <td className="py-3">{goalItem.target}</td>
                             <td className="py-3">
-                              {deadlineDays} days
+                              {goalItem.metrics && goalItem.metrics.length > 0
+                                ? goalItem.metrics.map((metric) => (
+                                    <div key={metric.metrics_name}>
+                                      {metric.metrics_name} {metric.target}
+                                    </div>
+                                  ))
+                                : "N/A"}
                             </td>
+                            <td className="py-3">{deadlineDays > 0 ? `${deadlineDays} days` : "Deadline passed"}</td>
                             <td className="py-3">
                               <div className="d-flex justify-content-center gap-2">
-                                <Button 
+                                <Button
                                   variant="light"
                                   size="sm"
                                   className="p-1 d-flex align-items-center justify-content-center"
@@ -314,7 +330,7 @@ const MyGoalsPage = () => {
                                 >
                                   <Edit size={16} />
                                 </Button>
-                                <Button 
+                                <Button
                                   variant="light"
                                   size="sm"
                                   className="p-1 d-flex align-items-center justify-content-center text-danger"
@@ -323,7 +339,7 @@ const MyGoalsPage = () => {
                                 >
                                   <Trash2 size={16} />
                                 </Button>
-                                <Button 
+                                <Button
                                   variant="light"
                                   size="sm"
                                   className="p-1 d-flex align-items-center justify-content-center"
@@ -384,7 +400,7 @@ const MyGoalsPage = () => {
                     <label className="form-label text-white">Type of Goal</label>
                     <select
                       className="form-control"
-                      name="type"
+                      name="goal_name"
                       value={selectedGoalType}
                       onChange={handleGoalTypeChange}
                       required
@@ -392,9 +408,9 @@ const MyGoalsPage = () => {
                       <option value="" disabled>
                         Select a goal type
                       </option>
-                      {goalTypes.map((goal) => (
-                        <option key={goal.goal_type_id} value={goal.goal_type_id}>
-                          {goal.goal_name}
+                      {goalTypes.map((goalType) => (
+                        <option key={goalType.goal_type_id} value={goalType.goal_type_id}>
+                          {goalType.goal_name}
                         </option>
                       ))}
                     </select>
@@ -408,40 +424,38 @@ const MyGoalsPage = () => {
                         {selectedMetrics.map((metric) => (
                           <li key={metric.metric_id} className="list-group-item">
                             <label className="form-label">{metric.metric_name}</label>
+                            {/* Current Value Input */}
+                            <input
+                              type={metric.metric_type === "int" ? "number" : "text"}
+                              className="form-control mb-2"
+                              placeholder={`Enter current value for ${metric.metric_name}`}
+                              value={metricInputs[metric.metric_name]?.current || ""} // Default to an empty string
+                              onChange={(e) =>
+                                handleMetricInputChange(metric.metric_name, "current", e.target.value)
+                              }
+                            />
+                            {/* Target Value Input */}
                             <input
                               type={metric.metric_type === "int" ? "number" : "text"}
                               className="form-control"
-                              placeholder={`Enter value for ${metric.metric_name}`}
-                              value={metricInputs[metric.metric_name] || ""}
-                              onChange={(e) => handleMetricInputChange(metric.metric_name, e.target.value)}
+                              placeholder={`Enter target value for ${metric.metric_name}`}
+                              value={metricInputs[metric.metric_name]?.target || ""} // Default to an empty string
+                              onChange={(e) =>
+                                handleMetricInputChange(metric.metric_name, "target", e.target.value)
+                              }
                             />
                           </li>
                         ))}
                       </ul>
                     </div>
                   )}
-
-                  {/* Other Inputs */}
-                  <div className="mb-3">
-                    <label className="form-label text-white">Target Value</label>
-                    <input
-                      className="form-control"
-                      type="text"
-                      name="target"
-                      value={goal.target}
-                      onChange={handleChange}
-                      placeholder="Enter target value"
-                      required
-                    />
-                  </div>
-
                   <div className="mb-3">
                     <label className="form-label text-white">Start Date</label>
                     <input
                       className="form-control"
                       type="date"
-                      name="startDate"
-                      value={goal.startDate}
+                      name="start_date"
+                      value={goal.start_date}
                       onChange={handleChange}
                       required
                     />
@@ -452,8 +466,8 @@ const MyGoalsPage = () => {
                     <input
                       className="form-control"
                       type="date"
-                      name="endDate"
-                      value={goal.endDate}
+                      name="end_date"
+                      value={goal.end_date}
                       onChange={handleChange}
                       required
                     />
@@ -489,5 +503,7 @@ const MyGoalsPage = () => {
     </div>
   );
 };
+
+
 
 export default MyGoalsPage;
