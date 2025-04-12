@@ -75,6 +75,28 @@ const MyGoalsPage = () => {
         return;
       }
 
+
+      const fetchedGoalTypes = await fetchGoalTypes(sessionToken);
+
+      for(let goal of fetchedGoals.goals) {
+        const goalType = fetchedGoalTypes.find(type => type.goal_name === goal.goal_name);
+        console.log("Goal Type:", goalType); // Log each goal type for debugging
+
+        if (goalType) {
+
+          for(let metric of goal.metrics) {
+            const metricType = goalType.metrics.find(m => m.metric_name === metric.metric_name);
+            console.log("Metric Type:", metricType); // Log each metric type for debugging
+
+
+            if (metricType) {
+              metric.metric_id = metricType.metric_id; // Set the metric type
+            }
+          }
+        }
+      }
+
+
       setGoals(fetchedGoals.goals);
     };
 
@@ -143,6 +165,7 @@ const MyGoalsPage = () => {
   
     try {
       const fetchedGoalTypes = await fetchGoalTypes(sessionToken); // Fetch goal types
+      console.log("Fetched Goal Types:", fetchedGoalTypes); // Log the fetched goal types for debugging
       setGoalTypes(fetchedGoalTypes); // Update the state with fetched goal types
       setShowPopup(true); // Open the modal
     } catch (error) {
@@ -177,6 +200,7 @@ const MyGoalsPage = () => {
       metrics_name: metric.metric_name, // Metric name
       current: metricInputs[metric.metric_name]?.current || "", // Current value
       target: metricInputs[metric.metric_name]?.target || "", // Target value
+      
     }));
   
     // Construct the newGoal object
