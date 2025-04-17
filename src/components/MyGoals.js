@@ -315,68 +315,75 @@ const MyGoalsPage = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {goals.map((goalItem, index) => {
-                        console.log("Goal Item:", goalItem); // Log each goal item for debugging
-                        const startDate = new Date(goalItem.start_date);
-                        const endDate = new Date(goalItem.end_date);
-                        const deadlineDays = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
+  {goals.map((goalItem, index) => {
+    const startDate = new Date(goalItem.start_date);
+    const endDate = new Date(goalItem.end_date);
+    const deadlineDays = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
 
-                        return (
-                          <tr key={index}>
-                            <td className="py-3 ps-4">{index + 1}</td>
-                            <td className="py-3">{goalItem.goal_name || "N/A"}</td>
-                            <td className="py-3">
-                              {goalItem.metrics && goalItem.metrics.length > 0
-                                ? goalItem.metrics.map((metric) => (
-                                    <div key={metric.metrics_name}>
-                                      {metric.metrics_name}{metric.metric_name}: {metric.current}
-                                    </div>
-                                  ))
-                                : "N/A"}
-                            </td>
-                            <td className="py-3">
-                              {goalItem.metrics && goalItem.metrics.length > 0
-                                ? goalItem.metrics.map((metric) => (
-                                    <div key={metric.metrics_name}>
-                                      {metric.metrics_name} {metric.target}
-                                    </div>
-                                  ))
-                                : "N/A"}
-                            </td>
-                            <td className="py-3">{deadlineDays > 0 ? `${deadlineDays} days` : "Deadline passed"}</td>
-                            <td className="py-3">
-                              <div className="d-flex justify-content-center gap-2">
-                                <Button
-                                  variant="light"
-                                  size="sm"
-                                  className="p-1 d-flex align-items-center justify-content-center"
-                                  style={{ width: '32px', height: '32px' }}
-                                >
-                                  <Edit size={16} />
-                                </Button>
-                                <Button
-                                  variant="light"
-                                  size="sm"
-                                  className="p-1 d-flex align-items-center justify-content-center text-danger"
-                                  style={{ width: '32px', height: '32px' }}
-                                  onClick={() => handleDeleteGoal(index)}
-                                >
-                                  <Trash2 size={16} />
-                                </Button>
-                                <Button
-                                  variant="light"
-                                  size="sm"
-                                  className="p-1 d-flex align-items-center justify-content-center"
-                                  style={{ width: '32px', height: '32px' }}
-                                >
-                                  <Info size={16} />
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
+    return (
+      <tr key={index}>
+        <td className="py-3 ps-4">{index + 1}</td>
+        <td className="py-3">{goalItem.goal_name || "N/A"}</td>
+        <td className="py-3">
+          {goalItem.metrics && goalItem.metrics.length > 0
+            ? goalItem.metrics.map((metric) => (
+                <div key={metric.metric_id}>
+                  {metric.metrics_name}: {metric.current}
+                </div>
+              ))
+            : "N/A"}
+        </td>
+        <td className="py-3">
+          {goalItem.metrics && goalItem.metrics.length > 0
+            ? goalItem.metrics.map((metric) => (
+                <div key={metric.metric_id}>
+                  {metric.metrics_name}: {metric.target}
+                </div>
+              ))
+            : "N/A"}
+        </td>
+        <td className="py-3">{deadlineDays > 0 ? `${deadlineDays} days` : "Deadline passed"}</td>
+        <td className="py-3">
+          <div className="d-flex justify-content-center gap-2">
+            {/* Edit Button */}
+            <Button
+              variant="light"
+              size="sm"
+              className="p-1 d-flex align-items-center justify-content-center"
+              style={{ width: '32px', height: '32px' }}
+              onClick={() => console.log("Edit functionality to be implemented")}
+            >
+              <Edit size={16} />
+            </Button>
+
+            {/* Delete Button */}
+            <Button
+              variant="light"
+              size="sm"
+              className="p-1 d-flex align-items-center justify-content-center text-danger"
+              style={{ width: '32px', height: '32px' }}
+              onClick={() => handleDeleteGoal(index)}
+            >
+              <Trash2 size={16} />
+            </Button>
+
+            {/* Info Button for Navigation */}
+            <Button
+              variant="light"
+              size="sm"
+              className="p-1 d-flex align-items-center justify-content-center"
+              style={{ width: '32px', height: '32px' }}
+              onClick={() => navigate(`/goals/${goalItem.goal_id}`, { state: { goal: goalItem } })}
+            >
+              <Info size={16} />
+            </Button>
+          </div>
+        </td>
+      </tr>
+    );
+  })}
+</tbody>
+
                   </table>
                 </div>
               </Card.Body>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../App.css";
-import { ChevronLeftIcon, Edit, Trash2, Info } from "lucide-react";
+import { ChevronLeftIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
 import Sidebar from "./Sidebar";
@@ -13,40 +13,16 @@ const GoalDescription = () => {
   const location = useLocation();
   const [isMobile, setIsMobile] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
-  
-  // Get goal data from the location state
-  const [goalData, setGoalData] = useState({
-    type: "Lose Weight",
-    currentValue: "180 lbs",
-    target: "160 lbs",
-    startDate: "2024-02-01",
-    endDate: "2024-06-01",
-    outcome: "Get fitter"
-  });
+  const goalData = location.state?.goal; // Access the goal data passed via state
 
-  // Calculate progress percentage (for demo purposes)
-  const progressPercentage = 68;
-  
-  // Calculate deadline in days
-  const startDate = new Date(goalData.startDate);
-  const endDate = new Date(goalData.endDate);
-  const deadlineDays = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
-  
-  useEffect(() => {
-    // Get goal data from location state if available
-    if (location.state && location.state.goal) {
-      setGoalData(location.state.goal);
-    }
-  }, [location]);
-  
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     handleResize(); // Initial check
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const toggleSidebar = () => {
@@ -56,26 +32,37 @@ const GoalDescription = () => {
   // Make sure this matches the width in Sidebar.js and Background.js
   const sidebarWidth = isMobile ? 0 : 256;
 
+  if (!goalData) {
+    return (
+      <div>
+        <h1>Goal Not Found</h1>
+        <button onClick={() => navigate(-1)}>Go Back</button>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen font-ubuntu flex relative">
       {/* Background Component */}
       <Background sidebarWidth={sidebarWidth} />
-      
+
       {/* Mobile Header - Only visible on mobile */}
       {isMobile && <MobileHeader toggleSidebar={toggleSidebar} />}
-      
+
       {/* Sidebar Component - Pass the show state and toggle function */}
       <Sidebar show={showSidebar} handleClose={() => setShowSidebar(false)} />
 
       {/* Main Content - Scrollable Content Area */}
-      <div 
-        className={`flex-1 overflow-auto relative z-10 px-3 px-md-4 ${isMobile ? 'mobile-adjusted-content' : ''}`}
-        style={{ 
-          marginLeft: isMobile ? '0' : `${sidebarWidth}px`, 
-          marginTop: '64px', // This should match the navbar height
-          paddingBottom: '32px',
-          transition: 'margin-left 0.3s ease-in-out',
-          backgroundColor: '#0A1A33'
+      <div
+        className={`flex-1 overflow-auto relative z-10 px-3 px-md-4 ${
+          isMobile ? "mobile-adjusted-content" : ""
+        }`}
+        style={{
+          marginLeft: isMobile ? "0" : `${sidebarWidth}px`,
+          marginTop: "64px", // This should match the navbar height
+          paddingBottom: "32px",
+          transition: "margin-left 0.3s ease-in-out",
+          backgroundColor: "#0A1A33",
         }}
       >
         <header className="pt-4 flex items-center justify-between">
@@ -93,68 +80,57 @@ const GoalDescription = () => {
             </h2>
           </div>
         </header>
-        
+
         {/* Goal Content */}
         <div className="p-2 p-md-4">
-          {/* Goal Summary Card - Using same table style as MyGoals.js */}
+          {/* Goal Summary Card */}
           <div className="bg-white rounded-lg overflow-hidden">
             <h3 className="font-bold px-4 pt-3">Goal Summary</h3>
             <div className="table-responsive">
               <table className="table table-hover mb-0">
-                <thead style={{ backgroundColor: '#f8f9fa' }}>
+                <thead style={{ backgroundColor: "#f8f9fa" }}>
                   <tr>
                     <th scope="col" className="py-3 ps-4">S.No.</th>
                     <th scope="col" className="py-3">Type of Goal</th>
                     <th scope="col" className="py-3">Current Value</th>
                     <th scope="col" className="py-3">Target Value</th>
                     <th scope="col" className="py-3">Deadline</th>
-                    <th scope="col" className="py-3 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <td className="py-3 ps-4">1</td>
                     <td className="py-3">
-                      <span style={{ color: '#007bff' }}>{goalData.type}</span>
+                      <span style={{ color: "#007bff" }}>{goalData.goal_name}</span>
                     </td>
-                    <td className="py-3">{goalData.currentValue}</td>
-                    <td className="py-3">{goalData.target}</td>
-                    <td className="py-3">{deadlineDays} days</td>
                     <td className="py-3">
-                      <div className="d-flex justify-content-center gap-2">
-                        <button 
-                          className="btn btn-light btn-sm p-1 d-flex align-items-center justify-content-center"
-                          style={{ width: '32px', height: '32px' }}
-                        >
-                          <Edit size={16} />
-                        </button>
-                        <button 
-                          className="btn btn-light btn-sm p-1 d-flex align-items-center justify-content-center text-danger"
-                          style={{ width: '32px', height: '32px' }}
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                        <button 
-                          className="btn btn-light btn-sm p-1 d-flex align-items-center justify-content-center"
-                          style={{ width: '32px', height: '32px' }}
-                        >
-                          <Info size={16} />
-                        </button>
-                      </div>
+                      {goalData.metrics.map((metric) => (
+                        <div key={metric.metric_id}>
+                          {metric.metrics_name}: {metric.current}
+                        </div>
+                      ))}
                     </td>
+                    <td className="py-3">
+                      {goalData.metrics.map((metric) => (
+                        <div key={metric.metric_id}>
+                          {metric.metrics_name}: {metric.target}
+                        </div>
+                      ))}
+                    </td>
+                    <td className="py-3">{goalData.end_date}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            
+
             {/* Progress bar */}
             <div className="px-4 pb-4">
               <div className="mt-3 mb-2 d-flex justify-content-between">
                 <span>Progress</span>
-                <span className="font-bold">{progressPercentage}%</span>
+                <span className="font-bold">{goalData.progressPercentage || 0}%</span>
               </div>
               <Progress
-                value={progressPercentage}
+                value={goalData.progressPercentage || 0}
                 className="h-4 bg-gray-300"
                 indicatorClassName="bg-[#F9A03F]"
               />
