@@ -18,6 +18,7 @@ import FitnessPlanner from "./components/FitnessPlanner";
 import Profile from "./components/Profile";
 import MyGoalsPage from "./components/MyGoals";
 import GoalDescription from "./components/GoalsDescription";
+import ResetPassword from "./resetpass";
 
 // Import Bootstrap CSS (after installing the package)
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -54,6 +55,7 @@ const App = () => {
         <Route path="/profile" element={<Profile />} />
 
         <Route path="/goals/:id" element={<GoalDescription />} />
+        <Route path= "/resetpassword" element={<ResetPassword/>} />
       </Routes>
     </Router>
   );

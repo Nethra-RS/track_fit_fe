@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react";
-import { signIn, getSession } from "next-auth/react";
-
-//const FRONTEND_URL = window.location.origin;
+import API_BASE_URL from "./lib/api";
+import { fetchSessionRaw } from "./lib/fetchSession";
 
 export function useAuth() {
   const [user, setUser] = useState(null);
@@ -9,63 +8,51 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   const fetchSession = useCallback(async () => {
-    try {
-      const res = await fetch("/api/auth/session", {
-        credentials: "include",
-      });
-
-      if (!res.ok) throw new Error("Session fetch failed");
-      const data = await res.json();
-
-      const skip = localStorage.getItem("skipSessionCheck") === "true";
-      if (skip) {
-        localStorage.removeItem("skipSessionCheck");
-        setUser(null);
-        setSession(null);
-        setLoading(false);
-        return;
-      }
-
-      if (data?.user) {
-        setUser(data.user);
-        setSession(data);
-      } else {
-        setUser(null);
-        setSession(null);
-      }
-    } catch {
+    const skip = localStorage.getItem("skipSessionCheck") === "true";
+    if (skip) {
+      localStorage.removeItem("skipSessionCheck");
       setUser(null);
       setSession(null);
-    } finally {
       setLoading(false);
+      return;
     }
+  
+    const session = await fetchSessionRaw();
+  
+    if (session) {
+      setUser(session.user);
+      setSession(session);
+    } else {
+      setUser(null);
+      setSession(null);
+    }
+  
+    setLoading(false);
   }, []);
-
+  
   const login = async (email, password) => {
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
+      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
       });
-  
-      if (result?.error) {
-        return { success: false, message: result.error || "Login failed" };
+
+      if (!res.ok) {
+        const error = await res.json();
+        return { success: false, message: error.message || "Login failed" };
       }
-  
+
       return { success: true };
-      
     } catch (err) {
-      return { success: false, message: err.message || "Unexpected error" };
+      return { success: false, message: err.message };
     }
   };
-  
-  
-  
 
   const register = async (name, email, password) => {
     try {
-      const res = await fetch("/api/auth/register", {
+      const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -74,14 +61,10 @@ export function useAuth() {
 
       if (!res.ok) {
         const error = await res.json();
-        return {
-          success: false,
-          message: error.message || "Registration failed",
-        };
+        return { success: false, message: error.message || "Registration failed" };
       }
 
-      await login(email, password);
-      return { success: true };
+      return await login(email, password);
     } catch (err) {
       return { success: false, message: err.message };
     }
@@ -89,7 +72,7 @@ export function useAuth() {
 
   const logout = async () => {
     try {
-      const res = await fetch("/api/auth/session", {
+      const res = await fetch(`${API_BASE_URL}/api/auth/session`, {
         credentials: "include",
       });
 
@@ -97,20 +80,48 @@ export function useAuth() {
       const email = data?.user?.email;
       if (!email) return;
 
-      await fetch("/api/auth/custom-logout", {
+      await fetch(`${API_BASE_URL}/api/auth/custom-logout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email }),
       });
 
       localStorage.setItem("skipSessionCheck", "true");
-
-      document.cookie = "next-auth.session-token=; Max-Age=0; path=/;";
-      document.cookie = "next-auth.csrf-token=; Max-Age=0; path=/;";
-
       window.location.href = "/signin?logoutSuccess=true";
     } catch (err) {
       console.error("Logout error:", err);
+    }
+  };
+
+  const signInWithGoogle = () => {
+    const callback = `${window.location.origin}/dashboard`;
+    window.location.href = `${API_BASE_URL}/api/auth/google-login?callbackUrl=${encodeURIComponent(callback)}`;
+  };
+
+  const signUpWithGoogle = () => {
+    localStorage.setItem("firstGoogleLogin", "true");
+    const callback = `${window.location.origin}/dashboard`;
+    window.location.href = `${API_BASE_URL}/api/auth/google-login?callbackUrl=${encodeURIComponent(callback)}`;
+  };
+
+  const deleteAccount = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/delete-account`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        return { success: false, message: error.message };
+      }
+
+      localStorage.setItem("skipSessionCheck", "true");
+      window.location.href = "/signin?accountDeleted=true";
+      return { success: true };
+    } catch (err) {
+      return { success: false, message: err.message };
     }
   };
 
@@ -122,6 +133,9 @@ export function useAuth() {
     register,
     logout,
     fetchSession,
+    signInWithGoogle,
+    signUpWithGoogle,
+    deleteAccount,
   };
 }
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
 import Background from './Background';
 import Sidebar from './Sidebar';
 import MobileHeader from './MobileHeader';
@@ -12,9 +13,12 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import API_BASE_URL from '../lib/api';
+import { fetchUserGoals } from '../goalAPI';
 
 const Dashboard = () => {
-  const [goals, setGoals] = useState(['Goal 1', 'Goal 2', 'Goal 3']);
+  const navigate = useNavigate();
+  const [goals, setGoals] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -39,14 +43,24 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    const alreadyAsked = sessionStorage.getItem('googleFitAccessAsked');
-    if (!alreadyAsked) {
-      setShowModal(true);
-    } else {
-      fetchAllHistoricalStats();
-    }
+    fetchAllHistoricalStats();
   }, []);
-
+  
+  useEffect(() => {
+    const loadGoals = async () => {
+      try {
+        const data = await fetchUserGoals(); // uses session cookie automatically
+        if (data?.goals?.length) {
+          setGoals(data.goals.map(g => g.goal_name));
+        }
+      } catch (err) {
+        console.error("Failed to load goals:", err);
+      }
+    };
+  
+    loadGoals();
+  }, []);
+  
   // Update current stats when week changes
   useEffect(() => {
     if (fitData) {
@@ -60,7 +74,7 @@ const Dashboard = () => {
       setFetchError(null);
       
       // Use relative URL for better compatibility across environments
-      const apiUrl = new URL('/api/google-fit/fetch-data', window.location.origin);
+      const apiUrl = `${API_BASE_URL}/api/google-fit/fetch-data`;
       console.log('Fetching data from:', apiUrl.toString());
       
       const res = await fetch(apiUrl, {
@@ -269,7 +283,7 @@ const Dashboard = () => {
     sessionStorage.setItem('googleFitAccessAsked', 'true');
     setShowModal(false);
     // Use dynamic URL based on current origin
-    window.location.href = `${window.location.origin}/api/google-fit/authorize`;
+    window.location.href = `${API_BASE_URL}/api/google-fit/authorize`;
   };
 
   const handleDenyAccess = () => {
@@ -278,8 +292,7 @@ const Dashboard = () => {
   };
 
   const addGoal = () => {
-    const newGoal = `Goal ${goals.length + 1}`;
-    setGoals([...goals, newGoal]);
+    navigate("/goals");
   };
 
   const toggleSidebar = () => {
@@ -357,7 +370,11 @@ const Dashboard = () => {
 
   // Retry fetching data
   const handleRetryFetch = () => {
-    fetchAllHistoricalStats();
+    if (fetchError?.includes("403")) {
+      window.location.href = `${API_BASE_URL}/api/google-fit/authorize`;
+    } else {
+      fetchAllHistoricalStats(); // Retry fetch
+    }
   };
 
   return (
@@ -441,9 +458,14 @@ const Dashboard = () => {
                 <Col className="text-center text-white mb-4">
                   <div className="bg-red-500/50 p-4 rounded-lg">
                     <p className="font-ubuntu mb-2">Error loading fitness data: {fetchError}</p>
-                    <Button onClick={handleRetryFetch} className="bg-white text-red-600 mt-2">
-                      Retry
+                    <Button
+                        onClick={handleRetryFetch}
+                       style={{ backgroundColor: "#ffffff", color: "#dc2626", fontWeight: "bold" }}
+                       className="mt-2"
+                    >
+                          Retry
                     </Button>
+
                   </div>
                 </Col>
               ) : !fitData || fitData.length === 0 ? (
@@ -490,19 +512,6 @@ const Dashboard = () => {
           </Col>
         </Row>
       </Container>
-
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl shadow-xl text-center max-w-sm w-full">
-            <h2 className="text-xl font-bold mb-4">Grant Google Fit Access</h2>
-            <p className="mb-4 text-gray-700">We need access to your Google Fit data to provide personalized insights.</p>
-            <div className="flex justify-center gap-4">
-              <Button onClick={handleGrantAccess} className="bg-primary text-white px-4 py-2 rounded">Grant Access</Button>
-              <Button onClick={handleDenyAccess} className="bg-gray-200 text-gray-800 hover:bg-gray-300 px-4 py-2 rounded">Deny</Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

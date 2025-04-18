@@ -2,15 +2,35 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ForgotPassword.css";
 import image from "./image 4.png";
+import API_BASE_URL from "./lib/api";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
 
-  const handleReset = () => {
-    console.log(`Password reset email sent to: ${email}`);
-    navigate("/RequestConfirmation");
+  const handleReset = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to send reset email");
+      }
+  
+      // ✅ Redirect only if the request is successful
+      navigate("/RequestConfirmation");
+    } catch (error) {
+      alert(error.message);
+    }
   };
+  
 
   return (
     <div className="forgot-container">

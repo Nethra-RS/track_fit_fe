@@ -1,68 +1,100 @@
 // 
-export async function fetchUserGoals(sessionToken) {
-    try {
-        const response = await fetch('/api/goals', {
-        method: 'GET',
-        headers: {
-            'Cookie': `next-auth.session-token=${sessionToken}`
-        },
-        credentials: 'include'
-        });
+import API_BASE_URL from "./lib/api"; // Make sure path is correct
 
-        if (!response.ok) throw new Error('Failed to fetch user goals');
+// Fetch user goals
+export async function fetchUserGoals() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/goals`, {
+      method: 'GET',
+      credentials: 'include',
+      cache: 'no-store' ,
+    });
 
-        const data = await response.json();
-        console.log('User Goals:', data);
-        return data;
-    } catch (error) {
-        console.error('Error fetching user goals:', error);
-        return [];
-    }
+    if (!response.ok) throw new Error('Failed to fetch user goals');
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching user goals:', error);
+    return [];
+  }
 }
-  
-// Fetch goal types from the backend
-export async function fetchGoalTypes(urlCookie) {
-    try {
-        const response = await fetch('/api/goals/config', {
-        method: 'GET',
-        headers: {
-            'Cookie': `next-auth.callback-url=${urlCookie}`,
-        },
-        credentials: 'include',
-        });
 
-        if (!response.ok) throw new Error('Failed to fetch goal types');
+// Fetch goal types
+export async function fetchGoalTypes() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/goals/config`, {
+      method: 'GET',
+      credentials: 'include',
+    });
 
-        const data = await response.json();
-        console.log('Goal Types:', data.goals);
-        return data.goals;
-    } catch (error) {
-        console.error('Error fetching goal types:', error);
-        return [];
-    }
+    if (!response.ok) throw new Error('Failed to fetch goal types');
+
+    const data = await response.json();
+    return data.goals;
+  } catch (error) {
+    console.error('Error fetching goal types:', error);
+    return [];
+  }
 }
-  
-// Create a new goal in the backend
-export async function createGoal(sessionToken, goalData) {
-    try {
-        const response = await fetch('/api/goals/create', {
-        method: 'POST',
-        headers: {
-            'Cookie': `next-auth.session-token=${sessionToken}`,
-            'Content-Type': 'application/json',
-            
-        },
-        credentials: 'include',
-        body: JSON.stringify(goalData)
-        });
 
-        if (!response.ok) throw new Error('Failed to create goal');
+// Create a new goal
+export async function createGoal(goalData) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/goals/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(goalData),
+    });
 
-        const data = await response.json();
-        console.log('Created Goal:', data);
-        return data;
-    } catch (error) {
-        console.error('Error creating goal:', error);
-    }
+    if (!response.ok) throw new Error('Failed to create goal');
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error creating goal:', error);
+  }
 }
+
+// Update an existing goal
+export async function updateGoal(goalId, goalData) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/goals/update`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ goal_id: goalId, ...goalData }),
+    });
+
+    if (!response.ok) throw new Error('Failed to update goal');
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error updating goal:', error);
+    return null;
+  }
+}
+
+// goalAPI.js
+export async function deleteGoal(goalId) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/goals/delete?id=${goalId}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+
+    if (!res.ok) throw new Error('Failed to delete goal');
+    return await res.json();
+  } catch (error) {
+    console.error("Error deleting goal:", error);
+    return null;
+  }
+}
+
   

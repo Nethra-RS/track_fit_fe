@@ -7,7 +7,7 @@ import image1 from "./image 2.png";
 
 const SignIn = () => {
   const navigate = useNavigate();
-  const { user, login, loading, fetchSession } = useAuth(); // 👈 import fetchSession
+  const { user, login, loading, fetchSession, signInWithGoogle } = useAuth(); // 👈 import fetchSession
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -59,12 +59,6 @@ const SignIn = () => {
   
   
 
-  const handleGoogleSignIn = () => {
-    const backendUrl = process.env.REACT_APP_API_URL;
-    const callbackUrl = `${window.location.origin}/dashboard`;
-    window.location.href = `${backendUrl}/api/auth/signin/google?callbackUrl=${callbackUrl}`;
-  };
-
   return (
     <div className="signin-container">
       <div className="background-new"></div>
@@ -110,7 +104,7 @@ const SignIn = () => {
 
           <div className="separator">---or---</div>
 
-          <button className="google-btn" onClick={handleGoogleSignIn}>
+          <button className="google-btn" onClick={signInWithGoogle}>
             <img src={image1} alt="Logo" />
             Sign in with Google
           </button>

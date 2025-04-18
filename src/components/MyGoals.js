@@ -5,9 +5,10 @@ import MobileHeader from "./MobileHeader";
 import { Edit, Trash2, Info } from 'lucide-react';
 import { useNavigate, useLocation } from "react-router-dom";
 import { Container, Row, Col, Button, Card } from 'react-bootstrap';
-
-import { fetchUserGoals, fetchGoalTypes, createGoal } from "../goalAPI.js"; // Import API functions
-import { type } from "@testing-library/user-event/dist/type/index.js";
+import GoalDescription from "./GoalsDescription.js";
+import { Link } from 'react-router-dom';
+import { fetchUserGoals, fetchGoalTypes, createGoal, updateGoal, deleteGoal } from "../goalAPI.js"; // Import API functions
+//import { type } from "@testing-library/user-event/dist/type/index.js";
 
 // MyGoalsPage Component
 const MyGoalsPage = () => {
@@ -24,19 +25,11 @@ const MyGoalsPage = () => {
   const [metricInputs, setMetricInputs] = useState({});
   const [goalTypes, setGoalTypes] = useState([]); // Stores goal types from the API
   const [selectedMetrics, setSelectedMetrics] = useState([]); // Stores metrics for the selected goal
+  const [isEditing, setIsEditing] = useState(false);
+  const [editGoalId, setEditGoalId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
 
-  function getCookie(name) {
-    const cookieStr = document.cookie;
-    const cookies = cookieStr.split(';');
-  
-    for (let cookie of cookies) {
-      const [key, value] = cookie.trim().split('=');
-      if (key === name) return decodeURIComponent(value);
-    }
-  
-    return null;
-  } // Currently does not work.
   
   // Handle goal type selection
   const handleGoalTypeChange = (e) => {
@@ -65,10 +58,11 @@ const MyGoalsPage = () => {
   };
 
   // Fetch user goals when the page loads
-  useEffect(() => { // Make sure to manually set the session token.
-    const sessionToken = "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..l1TNg-lew4CMW1Is.Pr9QNy8kJu-gl5k0Kh-95_aSuwj50IApRoWVwZOKXbpE1TbjgCrLRLOfgZT2ZjOvNKBoOPRBvwrfviUpsdMUxycXUmubQQJJE--ASikZog8wvRzJhdZgiEMGl2E_0qxlVNi7Is0xVzQW4uiAUglGDA_myAsyKUl2Xok2WdTPBD2VNj_lFz8JPVBe9F1JLMjXPyeA7sIlWD7EmLrcrftHK5vBR2T7GXJx3pkRCXUn4Nf58RSML5hsNxzl5rXMbLEiB73DbHMBCskQroHEdiUA6lIHRBV2BfmtKYXGbSok1igWiRENiKFrXIo6mFDGVIvxtsb-zVmPvjmxtPOyp-IIRgyeoycXbO2ZIMglOErYIcomQrNSD6jSid6rbNQlo6tIGAePw3wSm1tDXmtn.z9qVSLJddWqjUZrQH7mBjA";
+  useEffect(() => { 
     const loadGoals = async () => {
-      const fetchedGoals = await fetchUserGoals(sessionToken);
+      setLoading(true); 
+
+      const fetchedGoals = await fetchUserGoals();
       console.log("Fetched Goals:", fetchedGoals);
       if (!fetchedGoals.goals || fetchedGoals.goals.length === 0) {
         console.log("No goals found or failed to fetch goals");
@@ -76,8 +70,7 @@ const MyGoalsPage = () => {
       }
 
 
-      const fetchedGoalTypes = await fetchGoalTypes(sessionToken);
-
+      const fetchedGoalTypes = await fetchGoalTypes();
       for(let goal of fetchedGoals.goals) {
         const goalType = fetchedGoalTypes.find(type => type.goal_name === goal.goal_name);
         console.log("Goal Type:", goalType); // Log each goal type for debugging
@@ -98,16 +91,16 @@ const MyGoalsPage = () => {
 
 
       setGoals(fetchedGoals.goals);
+      setLoading(false); 
     };
 
     loadGoals();
   }, []);
 
   // Fetch goal types when the page loads
-  useEffect(() => { // Make sure to manually set the url cookie.
-    const urlCookie = "http%3A%2F%2Flocalhost%3A3000%2Fdashboard";
+  useEffect(() => { 
     const loadGoalTypes = async () => {
-      const fetchedGoalTypes = await fetchGoalTypes(urlCookie);
+      const fetchedGoalTypes = await fetchGoalTypes();
       setGoalTypes(fetchedGoalTypes);
     };
 
@@ -156,22 +149,47 @@ const MyGoalsPage = () => {
     }));
   };
 
-  const handleOpenPopup = async () => { // Make sure to manually set the session token.
-    const sessionToken = "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..l1TNg-lew4CMW1Is.Pr9QNy8kJu-gl5k0Kh-95_aSuwj50IApRoWVwZOKXbpE1TbjgCrLRLOfgZT2ZjOvNKBoOPRBvwrfviUpsdMUxycXUmubQQJJE--ASikZog8wvRzJhdZgiEMGl2E_0qxlVNi7Is0xVzQW4uiAUglGDA_myAsyKUl2Xok2WdTPBD2VNj_lFz8JPVBe9F1JLMjXPyeA7sIlWD7EmLrcrftHK5vBR2T7GXJx3pkRCXUn4Nf58RSML5hsNxzl5rXMbLEiB73DbHMBCskQroHEdiUA6lIHRBV2BfmtKYXGbSok1igWiRENiKFrXIo6mFDGVIvxtsb-zVmPvjmxtPOyp-IIRgyeoycXbO2ZIMglOErYIcomQrNSD6jSid6rbNQlo6tIGAePw3wSm1tDXmtn.z9qVSLJddWqjUZrQH7mBjA";
-    if (!sessionToken) {
-      console.error("Session token not found in cookies");
-      return;
+  const handleOpenPopup = (goal = null) => {
+    if (goal) {
+      setIsEditing(true);
+      setEditGoalId(goal.goal_id);
+      setGoal({
+        goal_name: goal.goal_name,
+        metrics: goal.metrics,
+        start_date: goal.start_date.split("T")[0],
+        end_date: goal.end_date.split("T")[0],
+      });
+      const prefilled = {};
+      goal.metrics.forEach(metric => {
+        prefilled[metric.metric_name] = {
+          current: metric.current,
+          target: metric.target,
+        };
+      });
+      setMetricInputs(prefilled);
+      const selected = goalTypes.find(g => g.goal_name === goal.goal_name);
+      if (selected) {
+        setSelectedGoalType(selected.goal_type_id);
+        setSelectedMetrics(selected.metrics);
+      }
+    } else {
+      // Opening for "Add New"
+      setIsEditing(false);
+      setEditGoalId(null);
+      setGoal({
+        goal_name: "",
+        metrics: [],
+        start_date: "",
+        end_date: "",
+      });
+      setMetricInputs({});
+      setSelectedGoalType("");
+      setSelectedMetrics([]);
     }
   
-    try {
-      const fetchedGoalTypes = await fetchGoalTypes(sessionToken); // Fetch goal types
-      console.log("Fetched Goal Types:", fetchedGoalTypes); // Log the fetched goal types for debugging
-      setGoalTypes(fetchedGoalTypes); // Update the state with fetched goal types
-      setShowPopup(true); // Open the modal
-    } catch (error) {
-      console.error("Error fetching goal types:", error);
-    }
+    setShowPopup(true);
   };
+  
 
   const handleClosePopup = () => {
     setShowPopup(false);
@@ -185,70 +203,60 @@ const MyGoalsPage = () => {
     setMetricInputs({}); // Reset metric inputs
   };
 
-  const handleAddGoal = async (e) => {
+  const handleSaveGoal = async (e) => {
     e.preventDefault();
   
-    // Dynamically get the session token
-    const sessionToken = "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..cHFWuT-ql7Tx0yMn.p2sCnpQ7pj2qr1LooMxVNo3mtjAIigVcjofRM83zR5W4Bbwb8oKKHck5HaOBHqVeV_4PtcpllW7r5I-Tv3hhTdSXd2r0fipPyM0ok3_87vwfsvP6aFpkKfKWccbEDR-bR0z9Kzi45IRwDoEY1L_WZLuAhVVaW0fmljCVtCipGgRBO3smqFHZMAdzLH-OkxgQNkPwfukeoaU7CJlCCHyyOKn58T_WElh5DC3zNLLe_cQ0kf9xzBLvEhxaz4qA0utPjdmLd9V8grUcVuUek5m-h1d2F7NNQA6agpAbWwZJ8u0CSyvlWWwGV-MyDVI9-0pcp_mtFMw6xOo1PEUQI6pV5-WJI27mVzTWDKdO0aJ_PFIUPJ2DEWM7Sktxzo6GKa2Foznlu7D3iV7qUI_4.ZIXvBlP4paEfl4m-zbGEbg"; // Replace with dynamic token retrieval
-    if (!sessionToken) {
-      console.error("Session token not found in cookies");
-      return;
-    }
-  
-    // Construct the metrics array from metricInputs
     const metricsArray = selectedMetrics.map((metric) => ({
-      metrics_name: metric.metric_name, // Metric name
-      current: metricInputs[metric.metric_name]?.current || "", // Current value
-      target: metricInputs[metric.metric_name]?.target || "", // Target value
-      
+      metric_id: metric.metric_id, 
+      metrics_name: metric.metric_name,
+      current: metricInputs[metric.metric_name]?.current || "",
+      target: metricInputs[metric.metric_name]?.target || "",
     }));
   
-    // Construct the newGoal object
-    const newGoal = {
-      goal_name: goal.goal_name, // Ensure goal_name is included
-      metrics: metricsArray, // The metrics array
-      start_date: goal.start_date, // Start date from the modal
-      end_date: goal.end_date, // End date from the modal
-      current_date: new Date().toISOString().split("T")[0], // Current date in YYYY-MM-DD format
+    const goalData = {
+      goal_name: goal.goal_name, // Cannot be edited, just included
+      metrics: metricsArray,
+      start_date: goal.start_date,
+      end_date: goal.end_date,
+      current_date: new Date().toISOString().split("T")[0],
     };
   
-    console.log("New Goal Data:", newGoal); // Log the new goal data for debugging
-  
     try {
-      // Call the createGoal API function
-      const createdGoal = await createGoal(sessionToken, newGoal);
-      console.log("Created Goal:", createdGoal);
-  
-      /*if (createdGoal) {
-        // Update the goals state with the newly created goal
-        setGoals([...goals, createdGoal]);
-  
-        // Reset the form and close the modal
-        setGoal({
-          goal_name: "",
-          metrics: [],
-          start_date: "",
-          end_date: "",
-        });
-        setMetricInputs({});
-        handleClosePopup();
-      }*/
-
-      if (createdGoal) {
-        // Refresh so that goal is readly available in the table.
-        window.location.reload();
+      let result;
+      if (isEditing && editGoalId) {
+        result = await updateGoal(editGoalId, goalData);
+        console.log("Updated Goal:", result);
+      } else {
+        result = await createGoal(goalData);
+        console.log("Created Goal:", result);
       }
+  
+      if (result) {
+        const refreshedGoals = await fetchUserGoals();
+        setGoals(refreshedGoals.goals || []);
+        handleClosePopup();
+      }      
     } catch (error) {
-      console.error("Error creating goal:", error);
+      console.error("Error saving goal:", error);
     }
   };
   
 
-  const handleDeleteGoal = (index) => {
-    const updatedGoals = [...goals];
-    updatedGoals.splice(index, 1);
-    setGoals(updatedGoals);
+  const handleDeleteGoal = async (goalId) => {
+    const confirmed = window.confirm("Are you sure you want to delete this goal?");
+    if (!confirmed) return;
+  
+    try {
+      const result = await deleteGoal(goalId);
+      if (result?.message) {
+        console.log(result.message);
+        setGoals(prev => prev.filter(g => g.goal_id !== goalId));
+      }
+    } catch (error) {
+      console.error("Error deleting goal:", error);
+    }
   };
+  
 
   return (
     <div className="min-h-screen font-ubuntu flex relative">
@@ -315,7 +323,15 @@ const MyGoalsPage = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {goals.map((goalItem, index) => {
+                     {loading ? (
+                       <tr>
+                         <td colSpan="6" className="text-center py-4">
+                         <span className="spinner-border spinner-border-sm me-2"></span>
+                          Loading goals...
+                         </td>
+                       </tr>
+                     ) : (
+                       goals.map((goalItem, index) => {
                         console.log("Goal Item:", goalItem); // Log each goal item for debugging
                         const startDate = new Date(goalItem.start_date);
                         const endDate = new Date(goalItem.end_date);
@@ -324,7 +340,12 @@ const MyGoalsPage = () => {
                         return (
                           <tr key={index}>
                             <td className="py-3 ps-4">{index + 1}</td>
-                            <td className="py-3">{goalItem.goal_name || "N/A"}</td>
+                            <td className="py-3"><Link 
+                                 to={`/goals/${goalItem.goal_id}`} 
+                                 className="text-decoration-none text-primary fw-semibold"
+                                >
+                                  {goalItem.goal_name || "N/A"}
+                                </Link></td>
                             <td className="py-3">
                               {goalItem.metrics && goalItem.metrics.length > 0
                                 ? goalItem.metrics.map((metric) => (
@@ -351,6 +372,7 @@ const MyGoalsPage = () => {
                                   size="sm"
                                   className="p-1 d-flex align-items-center justify-content-center"
                                   style={{ width: '32px', height: '32px' }}
+                                  onClick={() => handleOpenPopup(goalItem)} 
                                 >
                                   <Edit size={16} />
                                 </Button>
@@ -359,7 +381,7 @@ const MyGoalsPage = () => {
                                   size="sm"
                                   className="p-1 d-flex align-items-center justify-content-center text-danger"
                                   style={{ width: '32px', height: '32px' }}
-                                  onClick={() => handleDeleteGoal(index)}
+                                  onClick={() => handleDeleteGoal(goalItem.goal_id)}
                                 >
                                   <Trash2 size={16} />
                                 </Button>
@@ -375,7 +397,8 @@ const MyGoalsPage = () => {
                             </td>
                           </tr>
                         );
-                      })}
+                      })
+                    )}
                     </tbody>
                   </table>
                 </div>
@@ -418,7 +441,7 @@ const MyGoalsPage = () => {
                 }}
                 className="custom-scrollbar"
               >
-                <form onSubmit={handleAddGoal}>
+                <form onSubmit={handleSaveGoal}>
                   {/* Goal Type Dropdown */}
                   <div className="mb-3">
                     <label className="form-label text-white">Type of Goal</label>
@@ -427,6 +450,7 @@ const MyGoalsPage = () => {
                       name="goal_name"
                       value={selectedGoalType}
                       onChange={handleGoalTypeChange}
+                      disabled={isEditing}
                       required
                     >
                       <option value="" disabled>
@@ -507,7 +531,7 @@ const MyGoalsPage = () => {
                         border: "none",
                       }}
                     >
-                      + Add
+                      + Add/Edit 
                     </Button>
                     <Button
                       type="button"

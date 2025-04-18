@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Background from './Background';
 import Sidebar from './Sidebar';
 import MobileHeader from './MobileHeader';
 import { useNavigate, useLocation } from 'react-router-dom';
+import API_BASE_URL from '../lib/api';
 
 const ProfilePage = () => {
   const sidebarWidth = 256;
@@ -12,31 +13,25 @@ const ProfilePage = () => {
   const [showDetails, setShowDetails] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const fileInputRef = useRef(null);
-  
-  // Handle mobile detection
+
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-  
-  // Handle sidebar toggle for mobile
+
   const toggleSidebar = () => {
     setShowSidebar(!showSidebar);
   };
-  
-  // Get the previous page from location state or default to dashboard
+
   useEffect(() => {
     if (location.state && location.state.from) {
       setPreviousPage(location.state.from);
     }
   }, [location]);
-  
-  // Profile state - removed phone number
+
   const [profileInfo, setProfileInfo] = useState({
     firstName: '',
     lastName: '',
@@ -44,10 +39,9 @@ const ProfilePage = () => {
     gender: '',
     age: '',
     height: '',
-    weight: '',
-    photoUrl: null
+    weight: ''
   });
-  
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProfileInfo(prev => ({
@@ -55,127 +49,128 @@ const ProfilePage = () => {
       [name]: value
     }));
   };
-  
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    localStorage.setItem('userProfile', JSON.stringify(profileInfo));
-    // Here you would handle the form submission to update the profile in the database
-    console.log('Profile update submitted:', profileInfo);
-    // Show the details view after saving
-    setShowDetails(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/update-profile`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          gender: profileInfo.gender,
+          age: profileInfo.age,
+          height: profileInfo.height,
+          weight: profileInfo.weight
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Update failed');
+      setShowDetails(true);
+    } catch (error) {
+      console.error('❌ Error updating profile:', error);
+      alert('Failed to update profile. Please try again.');
+    }
   };
-  
+
   const handleBack = () => {
     navigate(previousPage);
   };
-  
+
   const handleCancel = () => {
-    // If we're showing details, go back to edit mode
-    if (showDetails) {
-      setShowDetails(false);
-    } else {
-      // Otherwise, navigate back to previous page
-      handleBack();
-    }
+    if (showDetails) setShowDetails(false);
+    else handleBack();
   };
-  
-  // Photo upload functionality
-  const handlePhotoClick = () => {
-    if (!showDetails) {
-      fileInputRef.current.click();
-    }
-  };
-  
-  const handlePhotoChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      
-      reader.onload = (event) => {
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/auth/user`, {
+          credentials: 'include',
+        });
+        if (!res.ok) throw new Error('Failed to fetch user data');
+        const data = await res.json();
+        const [firstName, ...lastNameArr] = (data.name || '').split(' ');
+        const lastName = lastNameArr.join(' ');
         setProfileInfo(prev => ({
           ...prev,
-          photoUrl: event.target.result
+          firstName: firstName || '',
+          lastName: lastName || '',
+          email: data.email || '',
+          gender: data.gender || '',
+          age: data.age || '',
+          height: data.height || '',
+          weight: data.weight || ''
         }));
-      };
-      
-      reader.readAsDataURL(file);
-    }
-  };
-  
+      } catch (error) {
+        console.error('Error loading user info:', error);
+      }
+    };
+    fetchUserProfile();
+  }, []);
+
   return (
     <div className="min-h-screen">
-      {/* Mobile Header - only shown on mobile */}
       {isMobile && <MobileHeader toggleSidebar={toggleSidebar} />}
-      
-      {/* Import components */}
       <Sidebar show={showSidebar} handleClose={() => setShowSidebar(false)} />
       <Background sidebarWidth={sidebarWidth} />
-      
-      {/* Main content area */}
-      <div 
+
+      <div
         className={`relative pb-12 ${isMobile ? 'px-4 pt-20' : 'px-8 pt-24'}`}
-        style={{ 
+        style={{
           marginLeft: isMobile ? '0' : `${sidebarWidth}px`,
           width: isMobile ? '100%' : `calc(100% - ${sidebarWidth}px)`,
         }}
       >
         <h1 className="text-3xl font-bold text-white mb-6">My Profile</h1>
-        
-        {/* Profile Card */}
+
         <div className="bg-white rounded-lg p-4 md:p-6 shadow-lg max-w-4xl mx-auto">
           {showDetails ? (
-            // Profile Details View
             <div>
               <div className="flex items-center mb-6">
                 <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-full mr-4 flex-shrink-0 overflow-hidden bg-gray-300">
-                  {profileInfo.photoUrl ? (
-                    <img src={profileInfo.photoUrl} alt="Profile" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-500">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                    </div>
-                  )}
+                {profileInfo.gender === "male" ? (
+                  <img src="/avatars/male.png" alt="Male Avatar" className="w-full h-full object-cover" />
+                )
+                : profileInfo.gender === "female" ? (
+                  <img src="/avatars/female.png" alt="Female Avatar" className="w-full h-full object-cover" />
+                ) 
+                : profileInfo.gender === "other" ? (
+                  <img src="/avatars/other.png" alt="Other Avatar" className="w-full h-full object-cover" />
+                ) 
+                : (
+                <div className="w-full h-full bg-gray-300 animate-pulse" />
+                )}
                 </div>
                 <div>
                   <h2 className="text-base md:text-lg">Hi,</h2>
-                  <h3 className="text-lg md:text-xl font-bold">{profileInfo.lastName} & {profileInfo.firstName}</h3>
+                  <h3 className="text-lg md:text-xl font-bold">{profileInfo.firstName} {profileInfo.lastName}</h3>
                 </div>
               </div>
-              
-              {/* Vertical layout for all screens */}
+
               <div className="grid grid-cols-1 gap-4 md:gap-6 mb-6 md:mb-8">
-                <div>
-                  <p className="text-gray-500 mb-1 text-sm md:text-base">First Name</p>
-                  <p className="font-medium text-sm md:text-base">{profileInfo.firstName}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 mb-1 text-sm md:text-base">Last Name</p>
-                  <p className="font-medium text-sm md:text-base">{profileInfo.lastName}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 mb-1 text-sm md:text-base">Email</p>
-                  <p className="font-medium text-sm md:text-base break-words">{profileInfo.email}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 mb-1 text-sm md:text-base">Gender</p>
-                  <p className="font-medium text-sm md:text-base">{profileInfo.gender}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 mb-1 text-sm md:text-base">Age</p>
-                  <p className="font-medium text-sm md:text-base">{profileInfo.age}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 mb-1 text-sm md:text-base">Height</p>
-                  <p className="font-medium text-sm md:text-base">{profileInfo.height} m</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 mb-1 text-sm md:text-base">Weight</p>
-                  <p className="font-medium text-sm md:text-base">{profileInfo.weight} lbs</p>
-                </div>
+                <p className="text-gray-500 mb-1 text-sm md:text-base">First Name</p>
+                <p className="font-medium text-sm md:text-base">{profileInfo.firstName}</p>
+
+                <p className="text-gray-500 mb-1 text-sm md:text-base">Last Name</p>
+                <p className="font-medium text-sm md:text-base">{profileInfo.lastName}</p>
+
+                <p className="text-gray-500 mb-1 text-sm md:text-base">Email</p>
+                <p className="font-medium text-sm md:text-base break-words">{profileInfo.email}</p>
+
+                <p className="text-gray-500 mb-1 text-sm md:text-base">Gender</p>
+                <p className="font-medium text-sm md:text-base">{profileInfo.gender}</p>
+
+                <p className="text-gray-500 mb-1 text-sm md:text-base">Age</p>
+                <p className="font-medium text-sm md:text-base">{profileInfo.age}</p>
+
+                <p className="text-gray-500 mb-1 text-sm md:text-base">Height</p>
+                <p className="font-medium text-sm md:text-base">{profileInfo.height} cm</p>
+
+                <p className="text-gray-500 mb-1 text-sm md:text-base">Weight</p>
+                <p className="font-medium text-sm md:text-base">{profileInfo.weight} lbs</p>
               </div>
-              
+
               <div className="flex justify-end">
                 <button
                   onClick={handleBack}
@@ -186,151 +181,44 @@ const ProfilePage = () => {
               </div>
             </div>
           ) : (
-            // Profile Edit Form
             <form onSubmit={handleSubmit}>
+              {/* Avatar preview (based on gender) */}
               <div className="flex items-center mb-6">
-                <div 
-                  className="relative w-12 h-12 md:w-16 md:h-16 rounded-full mr-4 flex-shrink-0 overflow-hidden bg-gray-300 cursor-pointer"
-                  onClick={handlePhotoClick}
-                >
-                  {profileInfo.photoUrl ? (
-                    <>
-                      <img src={profileInfo.photoUrl} alt="Profile" className="w-full h-full object-cover" />
-                      <div className="absolute bottom-0 right-0 bg-blue-600 rounded-full p-1 shadow-md">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                        </svg>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="w-full h-full flex items-center justify-center text-gray-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                      </div>
-                      <div className="absolute bottom-0 right-0 bg-blue-600 rounded-full p-1 shadow-md">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                        </svg>
-                      </div>
-                    </>
-                  )}
-                  
-                  <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    className="hidden" 
-                    accept="image/*" 
-                    onChange={handlePhotoChange} 
-                  />
+                <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-full mr-4 flex-shrink-0 overflow-hidden bg-gray-300">
+                {profileInfo.gender === "male" ? (
+                  <img src="/avatars/male.png" alt="Male Avatar" className="w-full h-full object-cover" />
+                )
+                : profileInfo.gender === "female" ? (
+                  <img src="/avatars/female.png" alt="Female Avatar" className="w-full h-full object-cover" />
+                ) 
+                : profileInfo.gender === "other" ? (
+                  <img src="/avatars/other.png" alt="Other Avatar" className="w-full h-full object-cover" />
+                ) 
+                : (
+                <div className="w-full h-full bg-gray-300 animate-pulse" />
+                )}
                 </div>
                 <div>
                   <h2 className="text-base md:text-lg">Hi,</h2>
-                  <h3 className="text-lg md:text-xl font-bold">Last & First Name</h3>
+                  <h3 className="text-lg md:text-xl font-bold">{profileInfo.firstName} {profileInfo.lastName}</h3>
                 </div>
               </div>
-              
-              {/* Vertical layout for all screens */}
+
               <div className="grid grid-cols-1 gap-4 md:gap-6 mb-6 md:mb-8">
-                <div>
-                  <label htmlFor="firstName" className="sr-only">First Name</label>
-                  <input
-                    type="text"
-                    id="firstName"
-                    name="firstName"
-                    placeholder="First Name"
-                    value={profileInfo.firstName}
-                    onChange={handleChange}
-                    className="w-full border-b border-gray-300 pb-2 focus:border-blue-500 focus:outline-none text-sm md:text-base"
-                  />
-                </div>
-                
-                <div>
-                  <label htmlFor="lastName" className="sr-only">Last Name</label>
-                  <input
-                    type="text"
-                    id="lastName"
-                    name="lastName"
-                    placeholder="Last Name"
-                    value={profileInfo.lastName}
-                    onChange={handleChange}
-                    className="w-full border-b border-gray-300 pb-2 focus:border-blue-500 focus:outline-none text-sm md:text-base"
-                  />
-                </div>
-                
-                <div>
-                  <label htmlFor="email" className="sr-only">Email</label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="Email"
-                    value={profileInfo.email}
-                    onChange={handleChange}
-                    className="w-full border-b border-gray-300 pb-2 focus:border-blue-500 focus:outline-none text-sm md:text-base"
-                  />
-                </div>
-                
-                <div>
-                  <label htmlFor="gender" className="sr-only">Gender</label>
-                  <select
-                    id="gender"
-                    name="gender"
-                    value={profileInfo.gender}
-                    onChange={handleChange}
-                    className="w-full border-b border-gray-300 pb-2 focus:border-blue-500 focus:outline-none appearance-none text-sm md:text-base"
-                  >
-                    <option value="">Gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                    <option value="prefer-not-to-say">Prefer not to say</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label htmlFor="age" className="sr-only">Age</label>
-                  <input
-                    type="number"
-                    id="age"
-                    name="age"
-                    placeholder="Age"
-                    value={profileInfo.age}
-                    onChange={handleChange}
-                    className="w-full border-b border-gray-300 pb-2 focus:border-blue-500 focus:outline-none text-sm md:text-base"
-                  />
-                </div>
-                
-                <div className="relative">
-                  <label htmlFor="height" className="sr-only">Height</label>
-                  <input
-                    type="text"
-                    id="height"
-                    name="height"
-                    placeholder="Height"
-                    value={profileInfo.height}
-                    onChange={handleChange}
-                    className="w-full border-b border-gray-300 pb-2 focus:border-blue-500 focus:outline-none pr-8 text-sm md:text-base"
-                  />
-                  <span className="absolute right-0 bottom-2 text-gray-500 text-sm md:text-base">m</span>
-                </div>
-                
-                <div className="relative">
-                  <label htmlFor="weight" className="sr-only">Weight</label>
-                  <input
-                    type="text"
-                    id="weight"
-                    name="weight"
-                    placeholder="Weight"
-                    value={profileInfo.weight}
-                    onChange={handleChange}
-                    className="w-full border-b border-gray-300 pb-2 focus:border-blue-500 focus:outline-none pr-8 text-sm md:text-base"
-                  />
-                  <span className="absolute right-0 bottom-2 text-gray-500 text-sm md:text-base">lbs</span>
-                </div>
+                <input type="text" name="firstName" value={profileInfo.firstName} onChange={handleChange} placeholder="First Name" />
+                <input type="text" name="lastName" value={profileInfo.lastName} onChange={handleChange} placeholder="Last Name" />
+                <input type="email" name="email" value={profileInfo.email} onChange={handleChange} placeholder="Email" />
+                <select name="gender" value={profileInfo.gender} onChange={handleChange}>
+                  <option value="">Gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+                <input type="number" name="age" value={profileInfo.age} onChange={handleChange} placeholder="Age" />
+                <input type="text" name="height" value={profileInfo.height} onChange={handleChange} placeholder="Height" />
+                <input type="text" name="weight" value={profileInfo.weight} onChange={handleChange} placeholder="Weight" />
               </div>
-              
+
               <div className="flex justify-end space-x-3 md:space-x-4">
                 <button
                   type="button"

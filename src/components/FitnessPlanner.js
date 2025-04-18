@@ -3,6 +3,7 @@ import Background from "./Background";
 import Sidebar from "./Sidebar";
 import MobileHeader from "./MobileHeader";
 import { format } from "date-fns";
+import API_BASE_URL from "../lib/api";
 
 const FitnessPlanner = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -33,7 +34,7 @@ const FitnessPlanner = () => {
       const day = date.getDate();
       const month = date.getMonth() + 1;
       const year = date.getFullYear();
-      const response = await fetch(`/api/goals?active=true&date=${day}&month=${month}&year=${year}`, {
+      const response = await fetch(`${API_BASE_URL}/api/goals?active=true&date=${day}&month=${month}&year=${year}`, {
         credentials: "include",
       });
       const data = await response.json();
@@ -51,14 +52,14 @@ const FitnessPlanner = () => {
     try {
       const month = selectedDate.getMonth() + 1;
       const year = selectedDate.getFullYear();
-      const response = await fetch(`/api/goals?active=true&month=${month}&year=${year}`, {
+      const response = await fetch(`${API_BASE_URL}/api/goals?active=true&month=${month}&year=${year}`, {
         credentials: "include",
       });
       const data = await response.json();
       const enrichedGoals = await Promise.all(
         (data.goals || []).map(async (goal) => {
           try {
-            const res = await fetch(`/api/goals/progress?goal_id=${goal.goal_id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/goals/progress?goal_id=${goal.goal_id}`, {
               credentials: "include",
             });
             const progressData = await res.json();

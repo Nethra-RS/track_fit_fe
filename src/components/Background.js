@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Container, Navbar, Nav, Dropdown } from 'react-bootstrap';
+import { fetchSessionRaw } from "../lib/fetchSession";
 import { useAuth } from '../useAuth';
 
 const Background = ({ sidebarWidth = 256 }) => {
@@ -24,27 +25,16 @@ const Background = ({ sidebarWidth = 256 }) => {
   }, []);
   
   useEffect(() => {
-    const fetchSession = async () => {
-      try {
-        const res = await fetch("/api/auth/session", {
-          credentials: "include",
-        });
-        const data = await res.json();
-        console.log("🧠 Session Data:", data); // 👈 log what you get
-  
-        if (data?.user?.name) {
-          setUserName(data.user.name);
-        } else {
-          console.log("⚠️ Name not found in session");
-        }
-      } catch (err) {
-        console.error("❌ Failed to fetch session:", err);
-      }
-    };
-  
-    fetchSession();
-
-  }, []);
+    const load = async () => {
+          const session = await fetchSessionRaw();
+          if (session?.user?.name) {
+            setUserName(session.user.name);
+          } else {
+            console.log("⚠️ Name not found in session");
+          }
+        };
+        load();
+      }, []);
   
   
   const { logout } = useAuth(); 

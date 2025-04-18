@@ -1,0 +1,101 @@
+.reset-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding: 1rem; /* Ensure padding on both sides */
+    flex-direction: column; /* Stack items vertically */
+  }
+  
+  /* Center Form */
+  .reset-form {
+    margin: 0 auto; /* Center the form horizontally */
+    width: 100%; /* Form spans full width */
+    max-width: 400px; /* Restrict max-width for larger screens */
+    text-align: center;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  }
+  /* Heading Styling */
+  .reset {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.75rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    color: black;
+  }
+  
+  /* Input Group Styling */
+  .input-group {
+    margin-bottom: 1.5rem;
+    text-align: left;
+  }
+  
+  .input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: black;
+  }
+  
+  .input-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .input-group input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(248, 161, 62, 0.5);
+  }
+  
+  /* Button Styling */
+  .change-btn {
+    background-color: #f8a13e;
+    color: white;
+    padding: 0.75rem;
+    width: 100%;
+    font-size: 1.125rem;
+    border: none;
+    border-radius: 0.5rem;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+    margin-top: 1rem;
+  }
+  
+  .change-btn:hover {
+    background-color: #e28b2c;
+  }
+  
+  /* Small Screen Adjustments */
+  @media (max-width: 768px) {
+    .reset-box {
+      padding: 1rem; /* Ensures padding on smaller screens */
+      flex-direction: column;
+      align-items: center;
+      height: auto; /* Allows form to adjust to content */
+    }
+  
+    .reset-form {
+      max-width: 300px; /* Shrinks form width */
+      padding: 1.5rem; /* Adjusts padding for smaller screens */
+    }
+  
+    .reset {
+      font-size: 1.5rem; /* Reduces heading size */
+    }
+  
+    .input-group input {
+      padding: 0.6rem; /* Adjusts padding */
+      font-size: 0.9rem; /* Decreases font size for inputs */
+    }
+  
+    .change-btn {
+      padding: 0.6rem; /* Adjusts button padding */
+      font-size: 1rem; /* Reduces button font size */
+    }
+  }

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Background from './Background';
 import Sidebar from './Sidebar';
 import MobileHeader from './MobileHeader';
+import { useAuth } from "../useAuth"; 
+import API_BASE_URL from '../lib/api';
 
 import { Link, useLocation } from 'react-router-dom';
 import { Menu } from 'lucide-react';
@@ -12,7 +14,8 @@ const SettingsPage = () => {
   const location = useLocation();
   const [isMobile, setIsMobile] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
-  
+  const { deleteAccount } = useAuth();
+  const { logout } = useAuth();
   // Check window size
   useEffect(() => {
     const savedProfile = localStorage.getItem('userProfile');
@@ -105,6 +108,43 @@ const SettingsPage = () => {
     alert('Changes saved successfully!');
   };
   
+  const handleLogout = () => {
+    console.log("🧪 Logout button clicked");
+    logout();
+  };
+  
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/auth/user`, {
+          credentials: 'include',
+        });
+
+        if (!res.ok) throw new Error('Failed to fetch user data');
+
+        const data = await res.json();
+
+        const [firstName, ...lastNameArr] = (data.name || '').split(' ');
+        const lastName = lastNameArr.join(' ');
+
+        setProfileInfo(prev => ({
+          ...prev,
+          firstName: firstName || '',
+          lastName: lastName || '',
+          email: data.email || '',
+          gender: data.gender || '',
+          age: data.age || '',
+          height: data.height || '',
+          weight: data.weight || ''
+        }));
+      } catch (error) {
+        console.error('Error loading user info:', error);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+
   return (
     <div className="min-h-screen font-ubuntu flex relative">
       {/* Import components */}
@@ -181,8 +221,21 @@ const SettingsPage = () => {
                 
                 {/* Profile Info Card - Same for both mobile and desktop */}
                 <div className="bg-gray-50 p-4 md:p-6 rounded-lg mb-6">
-                  <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 md:w-16 md:h-16 bg-gray-300 rounded-full flex-shrink-0 mr-4"></div>
+                <div className="flex items-center mb-4">
+                <div className="w-12 h-12 md:w-16 md:h-16 bg-gray-300 rounded-full flex-shrink-0 mr-4 overflow-hidden">
+                {profileInfo.gender === "male" ? (
+                  <img src="/avatars/male.png" alt="Male Avatar" className="w-full h-full object-cover" />
+                )
+                : profileInfo.gender === "female" ? (
+                  <img src="/avatars/female.png" alt="Female Avatar" className="w-full h-full object-cover" />
+                ) 
+                : profileInfo.gender === "other" ? (
+                  <img src="/avatars/other.png" alt="Other Avatar" className="w-full h-full object-cover" />
+                ) 
+                : (
+                <div className="w-full h-full bg-gray-300 animate-pulse" />
+                )}
+                </div>
                     <div>
                       <h3 className="text-base md:text-lg font-medium">Hi,</h3>
                       <p className="text-lg md:text-xl font-bold">{profileInfo.firstName} {profileInfo.lastName}</p>
@@ -195,8 +248,8 @@ const SettingsPage = () => {
                       <p className="font-medium">{profileInfo.email}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Phone</p>
-                      <p className="font-medium">{profileInfo.phone}</p>
+                      <p className="text-sm text-gray-500">Name</p>
+                      <p className="font-medium">{profileInfo.firstName} {profileInfo.lastName}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Gender</p>
@@ -208,7 +261,7 @@ const SettingsPage = () => {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Height</p>
-                      <p className="font-medium">{profileInfo.height ? `${profileInfo.height} m` : ''}</p>
+                      <p className="font-medium">{profileInfo.height ? `${profileInfo.height} cm` : ''}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Weight</p>
@@ -292,18 +345,11 @@ const SettingsPage = () => {
                     
                     <div className="space-y-3 md:space-y-4">
                       
-                      <button className="text-red-600 hover:text-red-800 font-medium block">
+                      <button className="text-red-600 hover:text-red-800 font-medium block" onClick={deleteAccount}>
                         Delete Account
                       </button>
                       <button className="text-blue-600 hover:text-blue-800 font-medium block"
-                       onClick={() => {
-                        // You might want to clear any auth state here if applicable
-                        // For example: localStorage.removeItem('userToken');
-                        // Or dispatch a logout action if using Redux
-                        
-                        // Navigate to signin page with success parameter
-                        window.location.href = '/signin?logoutSuccess=true';
-                      }}
+                       onClick={handleLogout}
                       >
                         Logout
                       </button>
@@ -434,7 +480,7 @@ const SettingsPage = () => {
                   <div className="bg-gray-50 p-4 md:p-6 rounded-lg">
                     <h3 className="font-medium mb-2">Frequently Asked Questions</h3>
                     <p className="text-gray-600 mb-3 md:mb-4">Find answers to commonly asked questions about using our platform.</p>
-                    <Link to="/faqs" className="text-blue-600 hover:text-blue-800 font-medium">
+                    <Link to="/FAQ" className="text-blue-600 hover:text-blue-800 font-medium">
                       View FAQ Page →
                     </Link>
                   </div>
@@ -452,14 +498,14 @@ const SettingsPage = () => {
                   <div>
                     <h3 className="font-medium mb-3 md:mb-4">Additional Resources</h3>
                     <div className="space-y-2">
+                      <Link to="/ReportBugs" className="block text-blue-600 hover:text-blue-800">
+                        Report Bug
+                      </Link>
+                      <Link to="/Support" className="block text-blue-600 hover:text-blue-800">
+                        Support
+                      </Link>
                       <Link to="/tutorials" className="block text-blue-600 hover:text-blue-800">
-                        Video Tutorials
-                      </Link>
-                      <Link to="/guides" className="block text-blue-600 hover:text-blue-800">
-                        User Guides
-                      </Link>
-                      <Link to="/community" className="block text-blue-600 hover:text-blue-800">
-                        Community Forum
+                        Video tutorials
                       </Link>
                     </div>
                   </div>

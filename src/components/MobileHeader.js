@@ -5,32 +5,22 @@ import { Navbar, Container, Dropdown } from 'react-bootstrap';
 //import { Link, useLocation } from 'react-router-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../useAuth';
+import { fetchSessionRaw } from "../lib/fetchSession";
 
 const MobileHeader = ({ toggleSidebar }) => {
   const navigate = useNavigate();
   const [userName, setUserName] = useState("");
   useEffect(() => {
-      const fetchSession = async () => {
-        try {
-          const res = await fetch("/api/auth/session", {
-            credentials: "include",
-          });
-          const data = await res.json();
-          console.log("🧠 Session Data:", data); // 👈 log what you get
-    
-          if (data?.user?.name) {
-            setUserName(data.user.name);
-          } else {
-            console.log("⚠️ Name not found in session");
-          }
-        } catch (err) {
-          console.error("❌ Failed to fetch session:", err);
-        }
-      };
-    
-      fetchSession();
-  
-    }, []);
+    const load = async () => {
+      const session = await fetchSessionRaw();
+      if (session?.user?.name) {
+        setUserName(session.user.name);
+      } else {
+        console.log("⚠️ Name not found in session");
+      }
+    };
+    load();
+  }, []);
   
   const { logout } = useAuth();
     const handleLogout = () => {

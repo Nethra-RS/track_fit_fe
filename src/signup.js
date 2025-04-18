@@ -4,6 +4,10 @@ import "./signup.css";
 import image from "./images.png"; 
 import image1 from "./image 2.png";
 import "./theme.css";
+import API_BASE_URL from "./lib/api";
+import { fetchSessionRaw } from "./lib/fetchSession";
+import { useEffect } from "react";
+
 
 
 const SignUp = () => {
@@ -17,6 +21,15 @@ const SignUp = () => {
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const { register } = useAuth();
+  const { signUpWithGoogle } = useAuth();
+
+  useEffect(() => {
+    const isFirstGoogleLogin = localStorage.getItem("firstGoogleLogin");
+    if (isFirstGoogleLogin === "true") {
+      localStorage.removeItem("firstGoogleLogin");
+      setShowDialog(true); // 🔓 Open profile setup steps
+    }
+  }, []);
 
   const handleSignUp = async () => {
     const result = await register(firstName, email, password);
@@ -27,15 +40,31 @@ const SignUp = () => {
     }
   };
 
-  const handleNext = () => {
-    if (step < 3) {
+  const handleNext = async () => {
+    if (step === 3) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/auth/update-profile`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ gender, age, height, weight }),
+        });
+  
+        if (!res.ok) {
+          const err = await res.json();
+          alert(err.message || "Failed to save profile");
+          return;
+        }
+  
+        // ✅ Go to Google Fit access step
+        setStep(step + 1);
+  
+      } catch (err) {
+        alert("Something went wrong while saving your profile.");
+        console.error(err);
+      }
+    } else if (step < 4) {
       setStep(step + 1);
-    } else {
-      // Submit details and redirect to dashboard
-      console.log({ gender, age, height, weight });
-      setShowDialog(false);
-      // Redirect to dashboard here
-      window.location.href = "/dashboard"; // Replace with actual dashboard path
     }
   };
 
@@ -60,7 +89,7 @@ const SignUp = () => {
           <h2 className="Up">SIGN UP</h2>
           
           <div className="input-group">
-            <label>First Name</label>
+            <label>Full Name</label>
             <input
               type="text"
               placeholder="Enter your first name"
@@ -95,7 +124,7 @@ const SignUp = () => {
           <div className="separator">--- or ---</div>
 
           {/* Google Sign-Up */}
-          <button className="google-btn">
+          <button className="google-btn" onClick={signUpWithGoogle}>
             <img src={image1} alt="Logo"/>
             Sign up with Google
           </button>
@@ -114,7 +143,7 @@ const SignUp = () => {
             <div className="dialogue-header">
               {step > 0 && <div className="arrow left-arrow" onClick={handleBack}>&#8592;</div>}
               <h3>Complete Setup!</h3>
-              {step < 3 && <div className="arrow right-arrow" onClick={handleNext}>&#8594;</div>}
+              {step < 4 && <div className="arrow right-arrow" onClick={handleNext}>&#8594;</div>}
             </div>
             <p className="subtext">Enter your details to get started!</p>
             {step === 0 && (
@@ -151,17 +180,31 @@ const SignUp = () => {
               </div>
             )}
             {step === 3 && (
-              <div>
-                <label>Weight (kg)</label>
-                <input
-                  type="number"
-                  placeholder="Enter your weight"
-                  value={weight}
-                  onChange={(e) => setWeight(e.target.value)}
+             <div>
+               <label>Weight (lbs)</label>
+               <input
+                 type="number"
+                 placeholder="Enter your weight"
+                 value={weight}
+                 onChange={(e) => setWeight(e.target.value)}
                 />
-              </div>
+               <button className="dialogue-submit" onClick={handleNext}>Submit</button>
+             </div>
             )}
-            {step === 3 && <button className="dialogue-submit" onClick={handleNext}>Submit</button>}
+
+            {step === 4 && (
+             <div>
+               <p className="mb-4 text-gray-700">We need access to your Google Fit data to provide personalized insights.</p>
+               <div className="flex justify-center gap-4">
+               <button className="dialogue-submit" onClick={() => {
+               window.location.href = `${API_BASE_URL}/api/google-fit/authorize`;
+               }}>Grant Access</button>
+               <button className="dialogue-submit bg-gray-300 text-black" onClick={() => {
+               window.location.href = "/dashboard";
+               }}>Deny</button>
+             </div>
+           </div>
+)}
           </div>
         </div>
       )}

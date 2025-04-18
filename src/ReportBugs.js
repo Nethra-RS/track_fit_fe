@@ -1,14 +1,36 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import "./ReportBugs.css";
+import API_BASE_URL from "./lib/api";
 
 const ReportBugs = () => {
   const [bug, setBug] = useState("");
+  const [status, setStatus] = useState("");
   const navigate = useNavigate(); // Initialize navigate function
 
-  const handleSubmit = () => {
-    console.log("Bug Report Submitted:", bug);
-    navigate(-1); // Navigate back to the previous page
+  const handleSubmit = async () => {
+    setStatus("Submitting...");
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/support/report-bug`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ bugDescription: bug }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setStatus("Bug report sent successfully!");
+        setBug("");
+        setTimeout(() => navigate(-1), 1500); // Redirect back after short delay
+      } else {
+        setStatus(data.message || "Failed to send bug report.");
+      }
+    } catch (error) {
+      console.error("Bug report error:", error);
+      setStatus("Something went wrong. Please try again.");
+    }
   };
 
   return (
@@ -26,6 +48,7 @@ const ReportBugs = () => {
         onChange={(e) => setBug(e.target.value)}
       ></textarea>
       <button className="Bug" onClick={handleSubmit}>Submit</button>
+      {status && <p className="status-text">{status}</p>}
     </div>
   );
 };
