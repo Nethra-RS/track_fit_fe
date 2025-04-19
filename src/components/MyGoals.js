@@ -201,7 +201,7 @@ const MyGoalsPage = () => {
     }
   
     setShowPopup(true);
-  };
+  };  
   
 
   const handleClosePopup = () => {

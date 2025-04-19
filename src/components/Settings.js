@@ -14,9 +14,9 @@ const SettingsPage = () => {
   const location = useLocation();
   const [isMobile, setIsMobile] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
-  const { deleteAccount } = useAuth();
-  const { logout } = useAuth();
-  // Check window size
+  const { deleteAccount, logout } = useAuth(); 
+  const [passwordStatus, setPasswordStatus] = useState(null); // ✅ added
+
   useEffect(() => {
     const savedProfile = localStorage.getItem('userProfile');
     if (savedProfile) {
@@ -31,12 +31,10 @@ const SettingsPage = () => {
     return () => window.removeEventListener('resize', checkSize);
   }, []);
   
-  // Toggle sidebar for mobile view
   const toggleSidebar = () => {
     setShowSidebar(!showSidebar);
   };
   
-  // Profile info (placeholders to be fetched from DB)
   const [profileInfo, setProfileInfo] = useState({
     firstName: '',
     lastName: '',
@@ -48,14 +46,12 @@ const SettingsPage = () => {
     weight: ''
   });
   
-  // Password change state
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
   
-  // Notification settings state
   const [notifications, setNotifications] = useState({
     email: true,
     push: true,
@@ -63,8 +59,7 @@ const SettingsPage = () => {
     achievementAlerts: true,
     weeklyReports: true
   });
-  
-  // Handle notification toggle
+
   const handleNotificationChange = (e) => {
     const { name, checked } = e.target;
     setNotifications(prev => ({
@@ -73,12 +68,10 @@ const SettingsPage = () => {
     }));
   };
 
-  // Handle tab switching
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
   
-  // Handle password form input changes
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
     setPasswordForm(prev => ({
@@ -86,33 +79,48 @@ const SettingsPage = () => {
       [name]: value
     }));
   };
-  
-  // Handle password form submission
-  const handlePasswordSubmit = (e) => {
+
+  const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    // Here you would normally handle the password change logic
-    console.log('Password change submitted:', passwordForm);
-    // Reset form after submission
-    setPasswordForm({
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
-    });
-    // Show success message (in a real app)
-    alert('Password changed successfully!');
+    setPasswordStatus(null);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/change-password`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(passwordForm),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to update password");
+
+      setPasswordStatus({ type: "success", message: data.message });
+      setPasswordForm({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (err) {
+      setPasswordStatus({ type: "error", message: err.message });
+    }
   };
-  
-  // Handle save changes
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   const handleSaveChanges = () => {
-    // In a real app, you would submit all changes to your backend
-    alert('Changes saved successfully!');
+    // Placeholder for future notification save logic
+    console.log("Notification preferences saved:", notifications);
   };
-  
-  const handleLogout = () => {
-    console.log("🧪 Logout button clicked");
-    logout();
-  };
-  
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -339,6 +347,12 @@ const SettingsPage = () => {
                           >
                             Change Password
                           </button>
+                          {passwordStatus && (
+                            <div className={`text-sm mt-2 ${passwordStatus.type === "success" ? "text-green-600" : "text-red-600"}`}>
+                              {passwordStatus.message}
+                            </div>
+                          )}
+
                         </div>
                       </form>
                     </div>
