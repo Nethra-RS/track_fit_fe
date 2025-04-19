@@ -32,6 +32,7 @@ const Dashboard = () => {
   const [fitData, setFitData] = useState(null);
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0); // 0 = current week
   const [fetchError, setFetchError] = useState(null);
+  const [showProfilePrompt, setShowProfilePrompt] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -59,6 +60,25 @@ const Dashboard = () => {
     };
   
     loadGoals();
+  }, []);
+  useEffect(() => {
+    const checkProfileCompletion = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/auth/user`, {
+          credentials: "include",
+        });
+        const user = await res.json();
+        
+        const missingFields = !user.gender || !user.age || !user.height || !user.weight;
+        if (missingFields) {
+          setShowProfilePrompt(true);
+        }
+      } catch (err) {
+        console.error("Failed to check profile:", err);
+      }
+    };
+  
+    checkProfileCompletion();
   }, []);
   
   // Update current stats when week changes
@@ -275,6 +295,7 @@ const Dashboard = () => {
       return {
         ...day,
         value: Number(dayValue.toFixed ? dayValue.toFixed(2) : dayValue)
+
       };
     });
   };
@@ -383,6 +404,37 @@ const Dashboard = () => {
       {isMobile && <MobileHeader toggleSidebar={toggleSidebar} />}
       <Sidebar show={showSidebar} handleClose={() => setShowSidebar(false)} />
 
+      {showProfilePrompt && (
+  <div
+    className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+    style={{ backgroundColor: "rgba(0, 0, 0, 0.5)", zIndex: 9999 }}
+  >
+    <div
+      className="bg-white rounded-4 shadow-lg p-4 w-75 w-md-50"
+      style={{ maxWidth: "500px" }}
+    >
+      <h5 className="fw-bold mb-3 text-center">
+        👋 Welcome! Let's get started.
+      </h5>
+      <p className="text-center mb-4">
+        Complete your profile and connect Google Fit to get personalized insights.
+      </p>
+      <div className="d-flex flex-column gap-2">
+        <Button variant="primary" onClick={() => navigate("/profile")}>
+          Complete Profile
+        </Button>
+        <Button variant="outline-primary" onClick={handleGrantAccess}>
+          Connect Google Fit
+        </Button>
+        <Button variant="outline-secondary" onClick={() => setShowProfilePrompt(false)}>
+          Dismiss
+        </Button>
+      </div>
+    </div>
+  </div>
+)}
+
+
       <Container
         fluid
         className={`overflow-auto relative z-10 px-3 px-md-4 ${isMobile ? 'mobile-adjusted-content' : ''}`}
@@ -483,7 +535,7 @@ const Dashboard = () => {
                     <Card className="text-white font-ubuntu p-0 h-100" style={{ backgroundColor: stat.color, borderRadius: '0.5rem', border: 'none' }}>
                       <Card.Body className="p-3">
                         <div className="font-bold text-lg">{stat.title}</div>
-                        <div className="text-2xl mb-2">{stat.value || '0'}</div>
+                        <div className="text-2xl mb-2">{stat.value ? stat.value.toFixed(2) : '0'}</div>
                         <div style={{ height: '140px' }}>
                           <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={getGraphData(stat.metricKey)}>

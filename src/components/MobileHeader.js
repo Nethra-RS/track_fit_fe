@@ -1,6 +1,6 @@
 import React from 'react';
 import{ useState, useEffect } from 'react';
-import { Bell, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { Navbar, Container, Dropdown } from 'react-bootstrap';
 //import { Link, useLocation } from 'react-router-dom';
 import { Link, useNavigate } from 'react-router-dom';
@@ -53,9 +53,6 @@ const MobileHeader = ({ toggleSidebar }) => {
         
         {/* Notification and User Dropdown */}
         <div className="d-flex align-items-center">
-          <button className="bg-transparent border-0 p-2 text-white">
-            <Bell size={20} />
-          </button>
           
           <Dropdown align="end">
             <Dropdown.Toggle 

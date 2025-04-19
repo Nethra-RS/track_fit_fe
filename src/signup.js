@@ -24,11 +24,11 @@ const SignUp = () => {
   const { signUpWithGoogle } = useAuth();
 
   useEffect(() => {
-    const isFirstGoogleLogin = localStorage.getItem("firstGoogleLogin");
+    /*const isFirstGoogleLogin = localStorage.getItem("firstGoogleLogin");
     if (isFirstGoogleLogin === "true") {
       localStorage.removeItem("firstGoogleLogin");
       setShowDialog(true); // 🔓 Open profile setup steps
-    }
+    }*/
   }, []);
 
   const handleSignUp = async () => {

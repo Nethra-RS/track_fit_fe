@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell } from 'lucide-react';
+//import { Bell } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Container, Navbar, Nav, Dropdown } from 'react-bootstrap';
 import { fetchSessionRaw } from "../lib/fetchSession";
@@ -85,10 +85,6 @@ const Background = ({ sidebarWidth = 256 }) => {
         >
           <Container fluid className="d-flex justify-content-end p-0">
             <Nav className="align-items-center">
-              {/* Notification Icon */}
-              <Nav.Link className="text-white p-1"> {/* Reduced padding */}
-                <Bell size={20} /> {/* Slightly smaller icon */}
-              </Nav.Link>
 
               {/* User Dropdown using React Bootstrap */}
               <Dropdown>

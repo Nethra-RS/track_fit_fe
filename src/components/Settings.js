@@ -116,10 +116,26 @@ const SettingsPage = () => {
     }
   };
 
-  const handleSaveChanges = () => {
-    // Placeholder for future notification save logic
-    console.log("Notification preferences saved:", notifications);
+  const handleSaveChanges = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/notifications/preferences`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ preferences: notifications }),
+      });
+  
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      alert("Preferences saved!");
+    } catch (err) {
+      console.error("Failed to save notification preferences:", err);
+      alert("Failed to save preferences");
+    }
   };
+  
 
   useEffect(() => {
     const fetchUserProfile = async () => {
