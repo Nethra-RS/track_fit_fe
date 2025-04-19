@@ -150,41 +150,54 @@ const MyGoalsPage = () => {
   };
 
   const handleOpenPopup = (goal = null) => {
-    if (goal) {
+    if (goal && typeof goal === "object") {
+      // Edit existing goal
       setIsEditing(true);
       setEditGoalId(goal.goal_id);
+  
+      const safeStartDate = goal.start_date?.split("T")[0] || "";
+      const safeEndDate = goal.end_date?.split("T")[0] || "";
+  
       setGoal({
-        goal_name: goal.goal_name,
-        metrics: goal.metrics,
-        start_date: goal.start_date.split("T")[0],
-        end_date: goal.end_date.split("T")[0],
+        goal_name: goal.goal_name || "",
+        metrics: goal.metrics || [],
+        start_date: safeStartDate,
+        end_date: safeEndDate,
       });
+  
       const prefilled = {};
-      goal.metrics.forEach(metric => {
+      (goal.metrics || []).forEach(metric => {
         prefilled[metric.metric_name] = {
-          current: metric.current,
-          target: metric.target,
+          current: metric.current || "",
+          target: metric.target || "",
         };
       });
       setMetricInputs(prefilled);
+  
       const selected = goalTypes.find(g => g.goal_name === goal.goal_name);
       if (selected) {
         setSelectedGoalType(selected.goal_type_id);
-        setSelectedMetrics(selected.metrics);
+        setSelectedMetrics(selected.metrics || []);
+      } else {
+        setSelectedGoalType("");
+        setSelectedMetrics([]);
       }
+  
     } else {
-      // Opening for "Add New"
+      // Add new goal
       setIsEditing(false);
       setEditGoalId(null);
+  
       setGoal({
         goal_name: "",
         metrics: [],
         start_date: "",
         end_date: "",
       });
+  
       setMetricInputs({});
-      setSelectedGoalType("");
-      setSelectedMetrics([]);
+      setSelectedGoalType("");      // <- allow user to choose freely
+      setSelectedMetrics([]);       // <- will get updated after goal type is selected
     }
   
     setShowPopup(true);
@@ -450,7 +463,7 @@ const MyGoalsPage = () => {
                       name="goal_name"
                       value={selectedGoalType}
                       onChange={handleGoalTypeChange}
-                      disabled={isEditing}
+                    
                       required
                     >
                       <option value="" disabled>
