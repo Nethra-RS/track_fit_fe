@@ -7,23 +7,32 @@ import Sidebar from "./Sidebar";
 import Background from "./Background";
 import MobileHeader from "./MobileHeader";
 import { useNavigate, useParams } from "react-router-dom";
-import { fetchUserGoals } from "../goalAPI";
-import API_BASE_URL from "../lib/api"; // Import API_BASE_URL
+import { fetchUserGoals, fetchGoalTypes } from "../goalAPI";
+import API_BASE_URL from "../lib/api";
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 
 const GoalDescription = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // goal_id from URL
+  const { id } = useParams();
   const [isMobile, setIsMobile] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [goalData, setGoalData] = useState(null);
-  const [goalProgress, setGoalProgress] = useState(0); // Added state for progress
+  const [goalProgress, setGoalProgress] = useState(0);
   const [showModal, setShowModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // Added loading state
-  const [aiSummary, setAiSummary] = useState(null); // Added state for AI recommendation data
-  const [error, setError] = useState(null); // Add error state
+  const [isLoading, setIsLoading] = useState(true);
+  const [aiSummary, setAiSummary] = useState(null);
+  const [error, setError] = useState(null);
   
+  // Add these states for the log progress modal
+  const [logModalOpen, setLogModalOpen] = useState(false);
+  const [goalTypes, setGoalTypes] = useState([]);
+  const [selectedGoalType, setSelectedGoalType] = useState("");
+  const [metricName, setMetricName] = useState("");
+  const [metricValue, setMetricValue] = useState("");
+  const [progressLogs, setProgressLogs] = useState([]);
+  const [refreshKey, setRefreshKey] = useState(0); // Used to trigger useEffect refresh
+
   const handleBlockedAction = () => setShowModal(true);
 
   // Modified fetchGoalSummary function with improved error handling
@@ -131,7 +140,20 @@ const GoalDescription = () => {
     };
 
     loadGoal();
-  }, [id]);
+  }, [id, refreshKey]); // Added refreshKey dependency to reload data after progress is logged
+
+  // Load goal types for dropdown
+  useEffect(() => {
+    const loadGoalTypes = async () => {
+      try {
+        const types = await fetchGoalTypes();
+        setGoalTypes(types);
+      } catch (error) {
+        console.error("Failed to load goal types:", error);
+      }
+    };
+    loadGoalTypes();
+  }, []);
 
   // Add this to load the goal summary
   useEffect(() => {
@@ -149,9 +171,9 @@ const GoalDescription = () => {
       }
     };
     loadGoalSummary();
-  }, [id]);
+  }, [id, refreshKey]); // Added refreshKey dependency
 
-  // New function to fetch goal progress from API
+  // Function to fetch goal progress from API
   const fetchGoalProgress = async (goalId) => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/goals/progress?goal_id=${goalId}`, {
@@ -164,6 +186,16 @@ const GoalDescription = () => {
       
       const progressData = await response.json();
       setGoalProgress(progressData?.summary?.overall_progress || 0);
+      
+      // Store progress logs for display in the UI
+      if (progressData?.progress && progressData.progress.length > 0) {
+        const formattedLogs = progressData.progress.map(log => ({
+          id: log.progress_id,
+          date: new Date(log.created_at).toLocaleDateString(),
+          metrics: log.metrics
+        }));
+        setProgressLogs(formattedLogs);
+      }
     } catch (error) {
       console.error("Error fetching goal progress:", error);
       // If API call fails, fall back to calculating progress from metrics
@@ -197,11 +229,60 @@ const GoalDescription = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Function to handle log progress submission
+  const handleLogProgress = async () => {
+    try {
+      // Find the selected metric
+      const selectedGoalTypeObj = goalTypes.find((g) => g.goal_type_id === selectedGoalType);
+      const metric = selectedGoalTypeObj?.metrics.find(m => m.metric_name === metricName);
+
+      if (!metric || !metric.metric_id || !goalData?.goal_id) {
+        alert("Invalid input. Please ensure all fields are filled correctly.");
+        return;
+      }
+
+      const res = await fetch(`${API_BASE_URL}/api/goals/progress`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          goal_id: goalData.goal_id,
+          metrics: [{ metric_id: metric.metric_id, metric_val: Number(metricValue) }]
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to log progress");
+      }
+
+      const data = await res.json();
+      console.log("Progress logged successfully:", data);
+      
+      // Reset form fields
+      setSelectedGoalType("");
+      setMetricName("");
+      setMetricValue("");
+      setLogModalOpen(false);
+      
+      // Trigger refresh of goal data
+      setRefreshKey(prev => prev + 1);
+      
+      // Show success notification (you could add a toast notification system here)
+      alert("Progress logged successfully!");
+    } catch (error) {
+      console.error("Error logging progress:", error);
+      alert("Failed to log progress. Please try again.");
+    }
+  };
+
   const toggleSidebar = () => setShowSidebar(!showSidebar);
   const sidebarWidth = isMobile ? 0 : 256;
 
-  // Replaced the progress calculation with the state value
-  const getProgress = () => goalProgress;
+  // Get available metrics based on selected goal type
+  const getAvailableMetrics = () => {
+    const selectedGoalTypeObj = goalTypes.find(g => g.goal_type_id === selectedGoalType);
+    return selectedGoalTypeObj?.metrics || [];
+  };
 
   const calculateDeadline = () => {
     if (!goalData?.start_date || !goalData?.end_date) return "N/A";
@@ -299,9 +380,9 @@ const GoalDescription = () => {
               <div className="px-4 pb-4">
                 <div className="mt-3 mb-2 d-flex justify-content-between">
                   <span>Progress</span>
-                  <span className="font-bold">{getProgress()}%</span>
+                  <span className="font-bold">{goalProgress}%</span>
                 </div>
-                <Progress value={getProgress()} className="h-4 bg-gray-300" indicatorClassName="bg-[#F9A03F]" />
+                <Progress value={goalProgress} className="h-4 bg-gray-300" indicatorClassName="bg-[#F9A03F]" />
               </div>
             </div>
             {/* Goal Details Grid - Responsive layout */}
@@ -379,108 +460,40 @@ const GoalDescription = () => {
                 <h3 className="text-xl font-medium mb-2 text-white">Log Progress</h3>
                 <div className="rounded-lg overflow-hidden">
                   <div className="bg-gradient-to-br from-[#F9A03F] via-[#3CAEA3] to-[#20639B] p-4 p-md-6 h-full">
-                    {aiSummary && aiSummary.progress_logs && aiSummary.progress_logs.length > 0 ? (
+                    {progressLogs && progressLogs.length > 0 ? (
                       <div className="text-white">
                         <h4 className="font-bold mb-3">Recent Progress:</h4>
                         <div className="space-y-2">
-                          {aiSummary.progress_logs.map((log, index) => (
+                          {progressLogs.slice(0, 3).map((log, index) => (
                             <div key={index} className="flex justify-between border-b border-white/30 pb-2">
                               <span>{log.date}</span>
-                              <span className="font-medium">{log.value}</span>
+                              <div>
+                                {log.metrics.map((metric, idx) => (
+                                  <div key={idx} className="text-right">
+                                    <span className="font-medium">{metric.metric_name}: {metric.value}</span>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                           ))}
                         </div>
-                        <button className="mt-4 bg-white text-[#20639B] px-4 py-2 rounded-md font-medium hover:bg-opacity-90 transition-all">
+                        <button 
+                          className="mt-4 bg-white text-[#20639B] px-4 py-2 rounded-md font-medium hover:bg-opacity-90 transition-all"
+                          onClick={() => setLogModalOpen(true)}
+                        >
                           Log New Progress
                         </button>
                       </div>
                     ) : (
                       <div className="text-white">
                         <p className="mb-3">No progress has been logged yet.</p>
-                        <button className="bg-white text-[#20639B] px-4 py-2 rounded-md font-medium hover:bg-opacity-90 transition-all">
+                        <button 
+                          className="bg-white text-[#20639B] px-4 py-2 rounded-md font-medium hover:bg-opacity-90 transition-all"
+                          onClick={() => setLogModalOpen(true)}
+                        >
                           Start Logging Progress
                         </button>
                       </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Time Frame */}
-              <div>
-                <h3 className="text-xl font-medium mb-2 text-white">Time Frame</h3>
-                <div className="rounded-lg overflow-hidden">
-                  <div className="bg-gradient-to-br from-[#F9A03F] via-[#3CAEA3] to-[#20639B] p-4 p-md-6 h-full">
-                    {aiSummary && aiSummary.time_frame ? (
-                      <div className="text-white">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <p className="text-white/70">Start Date</p>
-                            <p className="font-bold">{aiSummary.time_frame.start_date || "Not set"}</p>
-                          </div>
-                          <div>
-                            <p className="text-white/70">End Date</p>
-                            <p className="font-bold">{aiSummary.time_frame.end_date || "Not set"}</p>
-                          </div>
-                        </div>
-                        <div className="mt-4">
-                          <p className="text-white/70">Days Remaining</p>
-                          <div className="flex items-center mt-1">
-                            {aiSummary.time_frame.start_date && aiSummary.time_frame.end_date ? (
-                              <>
-                                <div className="w-full bg-white/30 h-2 rounded-full">
-                                  <div 
-                                    className="bg-white h-2 rounded-full" 
-                                    style={{ 
-                                      width: `${100 - (aiSummary.time_frame.days_remaining / 
-                                        ((new Date(aiSummary.time_frame.end_date) - new Date(aiSummary.time_frame.start_date)) / 
-                                        (1000 * 60 * 60 * 24)) * 100)}%` 
-                                    }}
-                                  ></div>
-                                </div>
-                                <span className="ml-3 font-bold">{aiSummary.time_frame.days_remaining}</span>
-                              </>
-                            ) : (
-                              <span>Date information not available</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-white">Loading time frame information...</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Specific Goal Completion */}
-              <div>
-                <h3 className="text-xl font-medium mb-2 text-white">Specific Goal Completion</h3>
-                <div className="rounded-lg overflow-hidden">
-                  <div className="bg-gradient-to-br from-[#F9A03F] via-[#3CAEA3] to-[#20639B] p-4 p-md-6 h-full">
-                    {aiSummary && aiSummary.goal_completion ? (
-                      <div className="text-white flex flex-col items-center">
-                        <div className="w-32 h-32 mb-4">
-                          <CircularProgressbar
-                            value={aiSummary.goal_completion.percentage || 0}
-                            text={`${aiSummary.goal_completion.percentage || 0}%`}
-                            styles={buildStyles({
-                              textColor: 'white',
-                              pathColor: 'white',
-                              trailColor: 'rgba(255, 255, 255, 0.3)',
-                            })}
-                          />
-                        </div>
-                        <div className="text-center">
-                          <div className="flex justify-between w-full mb-1">
-                            <span>Current: {aiSummary.goal_completion.current_val || 0}</span>
-                            <span>Target: {aiSummary.goal_completion.target_val || 0}</span>
-                          </div>
-                          <p className="mt-3">{aiSummary.goal_completion.progress_summary || "No progress summary available"}</p>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-white">Loading goal completion data...</p>
                     )}
                   </div>
                 </div>
@@ -493,6 +506,60 @@ const GoalDescription = () => {
           </div>
         )}
       </div>
+
+      {/* Log Progress Modal */}
+      {logModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-lg font-bold mb-4 text-center">Log Progress</h3>
+
+            <label className="block text-sm font-medium mb-1">Type of Goal</label>
+            <select
+              className="w-full border px-3 py-2 rounded mb-4"
+              value={selectedGoalType}
+              onChange={(e) => setSelectedGoalType(e.target.value)}
+            >
+              <option value="">Select goal type</option>
+              {goalTypes.map((type) => (
+                <option key={type.goal_type_id} value={type.goal_type_id}>{type.goal_name}</option>
+              ))}
+            </select>
+
+            <label className="block text-sm font-medium mb-1">Metric Name</label>
+            <select
+              className="w-full border px-3 py-2 rounded mb-4"
+              value={metricName}
+              onChange={(e) => setMetricName(e.target.value)}
+              disabled={!selectedGoalType}
+            >
+              <option value="">Select metric</option>
+              {getAvailableMetrics().map((metric) => (
+                <option key={metric.metric_id} value={metric.metric_name}>{metric.metric_name}</option>
+              ))}
+            </select>
+
+            <label className="block text-sm font-medium mb-1">Metric Value</label>
+            <input
+              className="w-full border px-3 py-2 rounded mb-6"
+              type="number"
+              placeholder="Enter value"
+              value={metricValue}
+              onChange={(e) => setMetricValue(e.target.value)}
+            />
+
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setLogModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button className="bg-blue-600 text-white" onClick={handleLogProgress}>
+                Submit
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Action Not Allowed Modal */}
       {showModal && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center px-2"

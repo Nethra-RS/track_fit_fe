@@ -68,6 +68,29 @@ const FitnessPlanner = () => {
     }
   }, [selectedDate, fitData]);
 
+  // Update todayGoals when activeGoals changes to sync checkboxes based on progress
+  useEffect(() => {
+    if (activeGoals.length > 0 && todayGoals.length > 0) {
+      const updatedTodayGoals = todayGoals.map(todayGoal => {
+        // Find corresponding active goal to get progress
+        const matchingActiveGoal = activeGoals.find(
+          activeGoal => activeGoal.goal_id === todayGoal.goal_id
+        );
+        
+        // If found and progress is 100%, mark as completed
+        if (matchingActiveGoal && matchingActiveGoal.overall_progress >= 100) {
+          return { ...todayGoal, completed: true };
+        }
+        return todayGoal;
+      });
+      
+      // Only update if there's any difference
+      if (JSON.stringify(updatedTodayGoals) !== JSON.stringify(todayGoals)) {
+        setTodayGoals(updatedTodayGoals);
+      }
+    }
+  }, [activeGoals, todayGoals]);
+
   // Fetch AI recommendations from API
   const fetchAiRecommendations = async () => {
     setLoadingRecommendations(true);
@@ -106,7 +129,7 @@ const FitnessPlanner = () => {
     setLoadingBmiData(true);
     try {
       // Fetch user's height and weight from database
-      const response = await fetch(`${API_BASE_URL}/api/user/profile`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/user`, {
         credentials: "include",
       });
       
@@ -219,7 +242,14 @@ const FitnessPlanner = () => {
         credentials: "include",
       });
       const data = await response.json();
-      setTodayGoals(data.goals || []);
+      
+      // Initialize goals with completed status based on existing data
+      const goalsWithCompletionStatus = (data.goals || []).map(goal => ({
+        ...goal,
+        completed: false // Default to false, will be updated based on progress
+      }));
+      
+      setTodayGoals(goalsWithCompletionStatus);
     } catch (error) {
       console.error("Failed to fetch daily goals", error);
       setTodayGoals([]);
@@ -262,11 +292,53 @@ const FitnessPlanner = () => {
     }
   };
   
+  // Toggle goal completion status
+  const toggleGoalCompletion = async (goalId, isCompleted) => {
+    // Update local state first for immediate UI feedback
+    setTodayGoals(prevGoals => 
+      prevGoals.map(goal => 
+        goal.goal_id === goalId 
+          ? { ...goal, completed: isCompleted } 
+          : goal
+      )
+    );
+    
+    // Here you would typically make an API call to update the completion status
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/goals/${goalId}/update-completion`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ completed: isCompleted })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update goal completion status');
+      }
+      
+      // Refresh goal progress after toggling completion
+      fetchActiveGoals();
+    } catch (error) {
+      console.error('Error updating goal completion:', error);
+      // Revert the UI change if the API call fails
+      setTodayGoals(prevGoals => 
+        prevGoals.map(goal => 
+          goal.goal_id === goalId 
+            ? { ...goal, completed: !isCompleted } 
+            : goal
+        )
+      );
+    }
+  };
+  
   // BMI calculation function
   const calculateBMI = (heightValue = height, weightValue = weight) => {
     if (heightValue && weightValue) {
       const heightInMeters = parseFloat(heightValue) / 100;
-      const bmi = (parseFloat(weightValue) / (heightInMeters * heightInMeters)).toFixed(1);
+      const weightInKg = parseFloat(weightValue) * 0.453592;
+      const bmi = (parseFloat(weightInKg) / (heightInMeters * heightInMeters)).toFixed(1);
       setBmiResult(bmi);
       return bmi;
     }
@@ -275,7 +347,7 @@ const FitnessPlanner = () => {
   
   const saveBmiData = async (height, weight) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/user/profile`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/user`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -429,7 +501,13 @@ const FitnessPlanner = () => {
                     ) : todayGoals.length > 0 ? (
                       todayGoals.map((goal, index) => (
                         <div key={index} className="flex items-center text-lg">
-                          <input type="checkbox" className="mr-3 h-5 w-5 accent-orange-400" />
+                          <input 
+                            type="checkbox" 
+                            className="mr-3 h-5 w-5 accent-orange-400" 
+                            checked={goal.completed || 
+                              activeGoals.some(ag => ag.goal_id === goal.goal_id && ag.overall_progress >= 100)}
+                            onChange={(e) => toggleGoalCompletion(goal.goal_id, e.target.checked)}
+                          />
                           <span className="text-white font-bold">{goal.goal_name}</span>
                         </div>
                       ))
@@ -579,7 +657,13 @@ const FitnessPlanner = () => {
                   ) : todayGoals.length > 0 ? (
                     todayGoals.map((goal, index) => (
                       <div key={index} className="flex items-center text-lg">
-                        <input type="checkbox" className="mr-3 h-5 w-5 accent-orange-400" />
+                        <input 
+                          type="checkbox" 
+                          className="mr-3 h-5 w-5 accent-orange-400" 
+                          checked={goal.completed || 
+                            activeGoals.some(ag => ag.goal_id === goal.goal_id && ag.overall_progress >= 100)}
+                          onChange={(e) => toggleGoalCompletion(goal.goal_id, e.target.checked)}
+                        />
                         <span className="text-white font-bold">{goal.goal_name}</span>
                       </div>
                     ))
