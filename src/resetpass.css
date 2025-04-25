@@ -5,6 +5,7 @@
     height: 100vh;
     padding: 1rem; /* Ensure padding on both sides */
     flex-direction: column; /* Stack items vertically */
+    font-family: 'Outfit', sans-serif;
   }
   
   /* Center Form */
@@ -99,3 +100,21 @@
       font-size: 1rem; /* Reduces button font size */
     }
   }
+  .status-container {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  
+  .error-message {
+    color: red;
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+  
+  .success-message {
+    color: green;
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+  

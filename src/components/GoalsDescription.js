@@ -32,6 +32,7 @@ const GoalDescription = () => {
   const [metricValue, setMetricValue] = useState("");
   const [progressLogs, setProgressLogs] = useState([]);
   const [refreshKey, setRefreshKey] = useState(0); // Used to trigger useEffect refresh
+  const [infoGoalId, setInfoGoalId] = useState(null);
 
   const handleBlockedAction = () => setShowModal(true);
 
@@ -368,9 +369,30 @@ const GoalDescription = () => {
                           <button className="btn btn-light btn-sm p-1 text-danger" style={{ width: '32px', height: '32px' }} onClick={handleBlockedAction}>
                             <Trash2 size={16} />
                           </button>
-                          <button className="btn btn-light btn-sm p-1" style={{ width: '32px', height: '32px' }}>
-                            <Info size={16} />
-                          </button>
+                          <div 
+  className="position-relative"
+  onMouseEnter={() => setInfoGoalId(goalData.goal_id)}
+  onMouseLeave={() => setInfoGoalId(null)}
+>
+  <Button
+    variant="light"
+    size="sm"
+    className="p-1 d-flex align-items-center justify-content-center"
+    style={{ width: '32px', height: '32px' }}
+  >
+    <Info size={16} />
+  </Button>
+
+  {infoGoalId === goalData.goal_id && (
+    <div 
+      className="position-absolute bg-white shadow rounded p-2 small text-start"
+      style={{ bottom: '10px', right: '0', zIndex: 1000, width: '220px' }}
+    >
+      <strong>Start Date:</strong> {goalData.start_date?.split("T")[0] || "N/A"}<br />
+      <em className="text-muted">Check below for AI recommendations and log your progress.</em>
+    </div>
+  )}
+</div>
                         </div>
                       </td>
                     </tr>

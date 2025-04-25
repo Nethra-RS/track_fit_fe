@@ -112,7 +112,7 @@ body {
 .signin-form .sign {
   font-size: 22px;
   font-weight: 700;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   text-align: center;
   color: #000000;
 }
@@ -252,6 +252,24 @@ body {
     text-align: center;
   }
 }
+
+
+.status-container {
+  height: 20px; /* Adjust as needed to fit one line */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  transition: all 0.3s ease;
+}
+
+.error-message,
+.success-message {
+  margin: 0;
+  font-size: 14px;
+  text-align: center;
+}
+
 
 .error-message {
   color: red;

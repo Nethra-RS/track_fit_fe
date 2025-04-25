@@ -1,4 +1,3 @@
-//resetpass.js
 import "./theme.css";
 import "./resetpass.css";
 import React, { useState, useEffect } from "react";
@@ -9,31 +8,41 @@ const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [token, setToken] = useState(null);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
 
-  // 🌐 Extract token from query param
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const resetToken = queryParams.get("token");
     setToken(resetToken);
 
     if (!resetToken) {
-      alert("Invalid or expired reset link.");
-      navigate("/ForgotPassword");
+      setError("Invalid or expired reset link.");
+      setTimeout(() => navigate("/ForgotPassword"), 3000);
     }
   }, [location.search, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    if (!passwordRegex.test(password)) {
+      setError("Password must be 8+ characters, include uppercase, number, and special character.");
+      return;
+    }
 
     if (password !== password2) {
-      alert("Passwords do not match!");
+      setError("Passwords do not match!");
       return;
     }
 
     if (!token) {
-      alert("Invalid or missing token.");
+      setError("Invalid or missing token.");
       return;
     }
 
@@ -48,11 +57,11 @@ const ResetPassword = () => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
 
-      alert("✅ Password reset successful!");
-      navigate("/signin");
+      setSuccess("✅ Password reset successful!");
+      setTimeout(() => navigate("/signin"), 2000);
     } catch (error) {
       console.error("❌ Reset error:", error);
-      alert(error.message || "Password reset failed.");
+      setError(error.message || "Password reset failed.");
     }
   };
 
@@ -66,6 +75,11 @@ const ResetPassword = () => {
       <div className="reset-box">
         <div className="reset-form">
           <h2 className="reset">RESET PASSWORD</h2>
+
+          <div className="status-container">
+            {error && <p className="error-message">{error}</p>}
+            {!error && success && <p className="success-message">{success}</p>}
+          </div>
 
           <form onSubmit={handleSubmit}>
             <div className="input-group">

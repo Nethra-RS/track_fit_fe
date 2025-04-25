@@ -33,6 +33,7 @@ const Dashboard = () => {
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0); // 0 = current week
   const [fetchError, setFetchError] = useState(null);
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
+  const [loadingGoals, setLoadingGoals] = useState(true);
 
   useEffect(() => {
     const handleResize = () => {
@@ -50,17 +51,23 @@ const Dashboard = () => {
   useEffect(() => {
     const loadGoals = async () => {
       try {
-        const data = await fetchUserGoals(); // uses session cookie automatically
+        setLoadingGoals(true); // 🔄 Start loading
+        const data = await fetchUserGoals();
         if (data?.goals?.length) {
           setGoals(data.goals.map(g => g.goal_name));
+        } else {
+          setGoals([]); // Important to reset if none
         }
       } catch (err) {
         console.error("Failed to load goals:", err);
+      } finally {
+        setLoadingGoals(false); // ✅ Stop loading
       }
     };
   
     loadGoals();
-  }, []);
+  }, []);  
+
   useEffect(() => {
     const checkProfileCompletion = async () => {
       try {
@@ -391,10 +398,17 @@ const Dashboard = () => {
 
   // Retry fetching data
   const handleRetryFetch = () => {
-    if (fetchError?.includes("403")) {
+    const lowerError = fetchError?.toLowerCase() || "";
+  
+    if (
+      lowerError.includes("403") ||
+      lowerError.includes("401") ||
+      lowerError.includes("expired") ||
+      lowerError.includes("invalid_grant")
+    ) {
       window.location.href = `${API_BASE_URL}/api/google-fit/authorize`;
     } else {
-      fetchAllHistoricalStats(); // Retry fetch
+      fetchAllHistoricalStats();
     }
   };
 
@@ -481,21 +495,30 @@ const Dashboard = () => {
 
         <Row>
           <Col md={4} className="mb-4 mb-md-0">
-            <Card className="border-0 overflow-hidden" style={{ background: 'linear-gradient(to bottom, #F8A13E, #6ECAE3, #01B1E3)', borderRadius: '1.5rem' }}>
-              <Card.Body className="p-4">
-                <div className="space-y-4">
-                  {goals.map((goal, index) => (
-                    <div key={index} className="bg-gray-500/50 text-white p-3 rounded-xl font-ubuntu mb-3">
-                      {goal}
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-3 d-flex justify-content-center">
-                  <Button onClick={addGoal} className="rounded-circle d-flex align-items-center justify-content-center p-0" style={{ width: '48px', height: '48px', backgroundColor: '#01B1E3', border: 'none' }}>
-                    <Plus size={24} />
-                  </Button>
-                </div>
-              </Card.Body>
+          <Card className="border-0 overflow-hidden" style={{ background: 'linear-gradient(to bottom, #F8A13E, #6ECAE3, #01B1E3)', borderRadius: '1.5rem' }}>
+           <Card.Body className="p-4">
+              <div className="space-y-4">
+              {loadingGoals ? (
+              <div className="text-white text-center mb-3 font-ubuntu">
+                <Spinner animation="border" variant="light" size="sm" className="me-2" />
+                 Loading your goals...
+              </div>
+              ) : goals.length > 0 ? (
+              goals.map((goal, index) => (
+              <div key={index} className="bg-gray-500/50 text-white p-3 rounded-xl font-ubuntu mb-3">
+                {goal}
+              </div>
+               ))
+               ) : (
+              <div className="text-white font-ubuntu text-center mb-3">No goals to display. Add goals.</div>
+                )}
+               </div>
+               <div className="mt-3 d-flex justify-content-center">
+                <Button onClick={addGoal} className="rounded-circle d-flex align-items-center justify-content-center p-0" style={{ width: '48px', height: '48px', backgroundColor: '#01B1E3', border: 'none' }}>
+                  <Plus size={24} />
+                </Button>
+               </div>
+             </Card.Body>
             </Card>
           </Col>
 
@@ -509,7 +532,9 @@ const Dashboard = () => {
               ) : fetchError ? (
                 <Col className="text-center text-white mb-4">
                   <div className="bg-red-500/50 p-4 rounded-lg">
-                    <p className="font-ubuntu mb-2">Error loading fitness data: {fetchError}</p>
+                  <p className="font-ubuntu mb-2">
+                      Oops! Unable to display Googlefit data, please retry.
+                  </p>
                     <Button
                         onClick={handleRetryFetch}
                        style={{ backgroundColor: "#ffffff", color: "#dc2626", fontWeight: "bold" }}

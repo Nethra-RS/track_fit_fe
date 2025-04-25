@@ -18,6 +18,7 @@ import FitnessPlanner from "./components/FitnessPlanner";
 import Profile from "./components/Profile";
 import MyGoalsPage from "./components/MyGoals";
 import GoalDescription from "./components/GoalsDescription";
+import ChatBubble from "./components/ChatBubble";
 import ResetPassword from "./resetpass";
 
 // Import Bootstrap CSS (after installing the package)
@@ -29,6 +30,7 @@ import "./theme.css";
 const App = () => {
   return (
     <Router>
+      <ChatBubble />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/signin" element={<SignIn />} />
@@ -56,6 +58,7 @@ const App = () => {
 
         <Route path="/goals/:id" element={<GoalDescription />} />
         <Route path= "/resetpassword" element={<ResetPassword/>} />
+        
       </Routes>
     </Router>
   );

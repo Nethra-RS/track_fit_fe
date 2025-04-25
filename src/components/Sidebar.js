@@ -11,6 +11,7 @@ const Sidebar = ({ show, handleClose }) => {
   // State for responsive sidebar
   const [isMobile, setIsMobile] = useState(false);
   
+  
   // Check window size
   useEffect(() => {
     const checkSize = () => {

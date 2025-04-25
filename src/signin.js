@@ -35,9 +35,17 @@ const SignIn = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
   
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
     if (!email || !password) {
       setError("Email and password are required");
+      return;
+    }
+  
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email (e.g., user@domain.com)");
       return;
     }
   
@@ -55,7 +63,7 @@ const SignIn = () => {
       console.error("Login error:", err);
       setError("Login failed. Please try again.");
     }
-  };
+  };  
   
   
 
@@ -75,9 +83,11 @@ const SignIn = () => {
         <div className="signin-form">
           <h2 className="sign">SIGN IN</h2>
 
-          {error && <p className="error-message">{error}</p>}
-          {success && <p className="success-message">{success}</p>}
-
+          <div className="status-container">
+             {error && <p className="error-message">{error}</p>}
+             {!error && success && <p className="success-message">{success}</p>}
+          </div>
+          
           <div className="input-group">
             <label>Email</label>
             <input

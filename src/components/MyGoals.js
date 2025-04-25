@@ -28,6 +28,7 @@ const MyGoalsPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editGoalId, setEditGoalId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [infoGoalId, setInfoGoalId] = useState(null);
 
 
   
@@ -343,7 +344,13 @@ const MyGoalsPage = () => {
                           Loading goals...
                          </td>
                        </tr>
-                     ) : (
+                      ) : goals.length === 0 ? (
+                         <tr>
+                           <td colSpan="6" className="text-center py-4 text-muted">
+                            No goals to display. Add goals to get started!.
+                            </td>
+                          </tr>
+                      ) : (
                        goals.map((goalItem, index) => {
                         console.log("Goal Item:", goalItem); // Log each goal item for debugging
                         const startDate = new Date(goalItem.start_date);
@@ -398,14 +405,30 @@ const MyGoalsPage = () => {
                                 >
                                   <Trash2 size={16} />
                                 </Button>
-                                <Button
-                                  variant="light"
-                                  size="sm"
-                                  className="p-1 d-flex align-items-center justify-content-center"
-                                  style={{ width: '32px', height: '32px' }}
-                                >
-                                  <Info size={16} />
-                                </Button>
+                                <div 
+  className="position-relative"
+  onMouseEnter={() => setInfoGoalId(goalItem.goal_id)}
+  onMouseLeave={() => setInfoGoalId(null)}
+>
+  <Button
+    variant="light"
+    size="sm"
+    className="p-1 d-flex align-items-center justify-content-center"
+    style={{ width: '32px', height: '32px' }}
+  >
+    <Info size={16} />
+  </Button>
+
+  {infoGoalId === goalItem.goal_id && (
+    <div 
+      className="position-absolute bg-white shadow rounded p-2 small text-start"
+      style={{ top: '40px', right: '0', zIndex: 1000, width: '220px' }}
+    >
+      <strong>Start Date:</strong> {goalItem.start_date?.split("T")[0] || "N/A"}<br />
+      <em className="text-muted">Click on goal to check progress and get smart recommendations.</em>
+    </div>
+  )}
+</div>
                               </div>
                             </td>
                           </tr>

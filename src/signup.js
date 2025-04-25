@@ -5,7 +5,6 @@ import image from "./images.png";
 import image1 from "./image 2.png";
 import "./theme.css";
 import API_BASE_URL from "./lib/api";
-import { fetchSessionRaw } from "./lib/fetchSession";
 import { useEffect } from "react";
 
 
@@ -20,6 +19,7 @@ const SignUp = () => {
   const [age, setAge] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
+  const [error, setError] = useState("");
   const { register } = useAuth();
   const { signUpWithGoogle } = useAuth();
 
@@ -31,42 +31,76 @@ const SignUp = () => {
     }*/
   }, []);
 
-  const handleSignUp = async () => {
-    const result = await register(firstName, email, password);
-    if (result.success) {
-      setShowDialog(true); // proceed to profile setup
-    } else {
-      alert(result.message || "Registration failed");
-    }
-  };
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+ const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
 
-  const handleNext = async () => {
-    if (step === 3) {
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/auth/update-profile`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ gender, age, height, weight }),
-        });
-  
-        if (!res.ok) {
-          const err = await res.json();
-          alert(err.message || "Failed to save profile");
-          return;
-        }
-  
-        // ✅ Go to Google Fit access step
-        setStep(step + 1);
-  
-      } catch (err) {
-        alert("Something went wrong while saving your profile.");
-        console.error(err);
+ const handleSignUp = async () => {
+  setError("");
+  if (!firstName || !email || !password) {
+    setError("All fields are required");
+    return;
+  }
+  if (!emailRegex.test(email)) {
+    setError("Please enter a valid email address");
+    return;
+  }
+  if (!passwordRegex.test(password)) {
+    setError("Password must be 8+ characters, include uppercase, number, and special character");
+    return;
+  }
+
+  const result = await register(firstName, email, password);
+  if (result.success) {
+    setShowDialog(true);
+  } else {
+    setError(result.message || "Registration failed");
+  }
+};
+
+
+const handleNext = async () => {
+  setError(""); // Reset previous error
+  if (step === 0 && !gender) {
+    setError("Please select a gender");
+    return;
+  }
+  if (step === 1 && (!age || parseInt(age) <= 0)) {
+    setError("Please enter a valid age");
+    return;
+  }
+  if (step === 2 && (!height || parseInt(height) <= 0)) {
+    setError("Please enter a valid height");
+    return;
+  }
+  if (step === 3 && (!weight || parseInt(weight) <= 0)) {
+    setError("Please enter a valid weight");
+    return;
+  }
+
+  if (step === 3) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/update-profile`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ gender, age, height, weight }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        setError(err.message || "Failed to save profile");
+        return;
       }
-    } else if (step < 4) {
+
       setStep(step + 1);
+    } catch (err) {
+      setError("Something went wrong while saving your profile.");
+      console.error(err);
     }
-  };
+  } else {
+    setStep(step + 1);
+  }
+};
 
   const handleBack = () => {
     if (step > 0) {
@@ -88,6 +122,10 @@ const SignUp = () => {
         <div className="signup-form">
           <h2 className="Up">SIGN UP</h2>
           
+          <div className="status-container">
+             {error && <p className="error-message">{error}</p>}
+          </div>
+
           <div className="input-group">
             <label>Full Name</label>
             <input
@@ -145,7 +183,8 @@ const SignUp = () => {
               <h3>Complete Setup!</h3>
               {step < 4 && <div className="arrow right-arrow" onClick={handleNext}>&#8594;</div>}
             </div>
-            <p className="subtext">Enter your details to get started!</p>
+            <p className="subtext">Registration is successful, Now, Enter your details to get started!</p>
+            {error && <p className="error-message" style={{ marginBottom: '10px' }}>{error}</p>}
             {step === 0 && (
               <div>
                 <label>Gender</label>
