@@ -708,6 +708,8 @@ const FitnessPlanner = () => {
                 </button>
               </div>
 
+              
+
               {/* AI Recommendations */}
               <div>
                 <h2 className="text-xl font-semibold text-white mb-4">AI Recommendations</h2>
@@ -975,13 +977,13 @@ const FitnessPlanner = () => {
             ) : (
               <div className="text-center">
                 <div className="text-4xl font-bold text-[#F8A13E] mb-2">
-                  {currentStats.calories || 0}
+                  {formatDecimal(currentStats.calories || 0)}
                 </div>
                 <p className="text-gray-600 mb-4">calories burned today</p>
                 <div className="bg-gray-100 p-4 rounded-lg">
-                  <p className="text-gray-700">
-                    Based on your activity level, you should aim for a total intake of approximately {Math.round((currentStats.calories || 0) + 1500)} calories today.
-                  </p>
+                <p className="text-gray-700">
+                  Based on your activity level, you should aim for a total intake of approximately {formatDecimal(Math.round((currentStats.calories || 0) + 1500))} calories today.
+                </p>
                 </div>
               </div>
             )}
