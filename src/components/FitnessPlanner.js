@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Background from "./Background";
 import Sidebar from "./Sidebar";
 import MobileHeader from "./MobileHeader";
-import { format } from "date-fns";
+import { format, addMonths, subMonths } from "date-fns";
 import API_BASE_URL from "../lib/api";
 import { Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
@@ -15,6 +15,9 @@ const FitnessPlanner = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
+  
+  // Progress logs state to track logged progress for the selected date
+  const [progressLogs, setProgressLogs] = useState({});
   
   // AI recommendations state
   const [aiRecommendations, setAiRecommendations] = useState([]);
@@ -68,20 +71,209 @@ const FitnessPlanner = () => {
     }
   }, [selectedDate, fitData]);
 
-  // Update todayGoals when activeGoals changes to sync checkboxes based on progress
-  useEffect(() => {
-    if (activeGoals.length > 0 && todayGoals.length > 0) {
-      const updatedTodayGoals = todayGoals.map(todayGoal => {
-        // Find corresponding active goal to get progress
-        const matchingActiveGoal = activeGoals.find(
-          activeGoal => activeGoal.goal_id === todayGoal.goal_id
-        );
+  // Fetch progress logs for all goals on selected date
+  const fetchProgressLogsForDate = async (date) => {
+    try {
+      const formattedDate = format(date, 'yyyy-MM-dd');
+      const promises = activeGoals.map(async (goal) => {
+        const response = await fetch(`${API_BASE_URL}/api/goals/progress?goal_id=${goal.goal_id}`, {
+          credentials: "include",
+        });
         
-        // If found and progress is 100%, mark as completed
-        if (matchingActiveGoal && matchingActiveGoal.overall_progress >= 100) {
-          return { ...todayGoal, completed: true };
+        if (!response.ok) return null;
+        
+        const data = await response.json();
+        
+        // Check if there's progress logged for this specific date
+        const hasProgressForDate = data.progress.some(p => {
+          const progressDate = new Date(p.created_at);
+          return progressDate.toDateString() === date.toDateString();
+        });
+        
+        return {
+          goalId: goal.goal_id,
+          hasProgressForDate,
+          status: data.summary?.status || 'not_started',
+          description: goal.goal_description || '', // Include description
+          progressDetails: data.progress || [] // Include progress details
+        };
+      });
+      
+      const results = await Promise.all(promises);
+      const logs = {};
+      
+      results.forEach(result => {
+        if (result) {
+          logs[result.goalId] = {
+            hasProgressForDate: result.hasProgressForDate,
+            status: result.status,
+            description: result.description,
+            progressDetails: result.progressDetails
+          };
         }
-        return todayGoal;
+      });
+      
+      setProgressLogs(logs);
+    } catch (error) {
+      console.error("Failed to fetch progress logs", error);
+    }
+  };
+
+  // Update fetchGoalsForDate to include all goals between start and end dates
+  const fetchGoalsForDate = async (date) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/goals?active=true`, {
+        credentials: "include",
+      });
+      const data = await response.json();
+      
+      // Filter goals based on date (only those where selected date is between start and end date)
+      const goalsForDate = (data.goals || []).filter(goal => {
+        const startDate = new Date(goal.start_date);
+        const endDate = new Date(goal.end_date);
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 59, 999);
+        
+        const targetDate = new Date(date);
+        targetDate.setHours(12, 0, 0, 0);
+        
+        return targetDate >= startDate && targetDate <= endDate;
+      });
+      
+      // Initialize all goals as not completed
+      const goalsWithCompletionStatus = goalsForDate.map(goal => ({
+        ...goal,
+        completed: false
+      }));
+      
+      setTodayGoals(goalsWithCompletionStatus);
+      
+      // After fetching goals, fetch progress logs for those goals
+      await fetchProgressLogsForDate(date);
+    } catch (error) {
+      console.error("Failed to fetch daily goals", error);
+      setTodayGoals([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchActiveGoals = async () => {
+    setIsLoading(true);
+    try {
+      const month = selectedDate.getMonth() + 1;
+      const year = selectedDate.getFullYear();
+      const response = await fetch(`${API_BASE_URL}/api/goals?active=true&month=${month}&year=${year}`, {
+        credentials: "include",
+      });
+      const data = await response.json();
+      const enrichedGoals = await Promise.all(
+        (data.goals || []).map(async (goal) => {
+          try {
+            const res = await fetch(`${API_BASE_URL}/api/goals/progress?goal_id=${goal.goal_id}`, {
+              credentials: "include",
+            });
+            const progressData = await res.json();
+            return {
+              ...goal,
+              overall_progress: progressData?.summary?.overall_progress || 0,
+              status: progressData?.summary?.status || 'not_started'
+            };
+          } catch {
+            return { ...goal, overall_progress: 0, status: 'not_started' };
+          }
+        })
+      );
+      setActiveGoals(enrichedGoals);
+      
+      // After fetching active goals, update progress logs
+      await fetchProgressLogsForDate(selectedDate);
+    } catch (error) {
+      console.error("Failed to fetch active goals", error);
+      setActiveGoals([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Modified to log progress for the selected date
+  const logDailyProgress = async (goalId) => {
+    try {
+      // Get the metrics for this goal
+      const goal = activeGoals.find(g => g.goal_id === goalId);
+      if (!goal) return;
+      
+      // Create a simple progress entry with dummy data
+      // In a real implementation, you would show a form to collect actual values
+      const metrics = goal.metrics.map(metric => ({
+        metric_id: metric.metric_id,
+        metric_val: 1 // Just a dummy value to log progress
+      }));
+      
+      const response = await fetch(`${API_BASE_URL}/api/goals/progress`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          goal_id: goalId,
+          metrics
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to log progress');
+      }
+      
+      // Update local state to show the progress immediately
+      setProgressLogs(prevLogs => ({
+        ...prevLogs,
+        [goalId]: {
+          ...(prevLogs[goalId] || {}),
+          hasProgressForDate: true,
+          description: goal.goal_description || '',
+          progressDetails: [...((prevLogs[goalId]?.progressDetails || [])), {
+            created_at: new Date().toISOString(),
+            values: metrics
+          }]
+        }
+      }));
+      
+      // Refresh active goals to update progress
+      fetchActiveGoals();
+    } catch (error) {
+      console.error('Error logging progress:', error);
+    }
+  };
+  
+  // Toggle goal completion status (now used for logging progress for the day)
+  const toggleGoalCompletion = async (goalId, isCompleted) => {
+    // If trying to mark as completed, log progress
+    if (isCompleted) {
+      await logDailyProgress(goalId);
+    } else {
+      // Implement logic to delete progress for this date if needed
+      console.log("Deleting progress is not implemented yet");
+    }
+  };
+
+  // Update todayGoals when progressLogs or activeGoals changes
+  useEffect(() => {
+    if (Object.keys(progressLogs).length > 0 && todayGoals.length > 0) {
+      const updatedTodayGoals = todayGoals.map(todayGoal => {
+        const progressLog = progressLogs[todayGoal.goal_id];
+        
+        // Mark as completed if progress is logged for this date OR status is completed
+        const completed = progressLog?.hasProgressForDate || progressLog?.status === 'completed';
+        
+        return { 
+          ...todayGoal, 
+          completed,
+          progressDetails: progressLog?.progressDetails || [],
+          description: progressLog?.description || todayGoal.goal_description || ''
+        };
       });
       
       // Only update if there's any difference
@@ -89,7 +281,7 @@ const FitnessPlanner = () => {
         setTodayGoals(updatedTodayGoals);
       }
     }
-  }, [activeGoals, todayGoals]);
+  }, [progressLogs, todayGoals]);
 
   // Fetch AI recommendations from API
   const fetchAiRecommendations = async () => {
@@ -231,114 +423,13 @@ const FitnessPlanner = () => {
     console.log('Final day stats:', dayStats);
     setCurrentStats(dayStats);
   };
-
-  const fetchGoalsForDate = async (date) => {
-    setIsLoading(true);
-    try {
-      const day = date.getDate();
-      const month = date.getMonth() + 1;
-      const year = date.getFullYear();
-      const response = await fetch(`${API_BASE_URL}/api/goals?active=true&date=${day}&month=${month}&year=${year}`, {
-        credentials: "include",
-      });
-      const data = await response.json();
-      
-      // Initialize goals with completed status based on existing data
-      const goalsWithCompletionStatus = (data.goals || []).map(goal => ({
-        ...goal,
-        completed: false // Default to false, will be updated based on progress
-      }));
-      
-      setTodayGoals(goalsWithCompletionStatus);
-    } catch (error) {
-      console.error("Failed to fetch daily goals", error);
-      setTodayGoals([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchActiveGoals = async () => {
-    setIsLoading(true);
-    try {
-      const month = selectedDate.getMonth() + 1;
-      const year = selectedDate.getFullYear();
-      const response = await fetch(`${API_BASE_URL}/api/goals?active=true&month=${month}&year=${year}`, {
-        credentials: "include",
-      });
-      const data = await response.json();
-      const enrichedGoals = await Promise.all(
-        (data.goals || []).map(async (goal) => {
-          try {
-            const res = await fetch(`${API_BASE_URL}/api/goals/progress?goal_id=${goal.goal_id}`, {
-              credentials: "include",
-            });
-            const progressData = await res.json();
-            return {
-              ...goal,
-              overall_progress: progressData?.summary?.overall_progress || 0,
-            };
-          } catch {
-            return { ...goal, overall_progress: 0 };
-          }
-        })
-      );
-      setActiveGoals(enrichedGoals);
-    } catch (error) {
-      console.error("Failed to fetch active goals", error);
-      setActiveGoals([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  // Toggle goal completion status
-  const toggleGoalCompletion = async (goalId, isCompleted) => {
-    // Update local state first for immediate UI feedback
-    setTodayGoals(prevGoals => 
-      prevGoals.map(goal => 
-        goal.goal_id === goalId 
-          ? { ...goal, completed: isCompleted } 
-          : goal
-      )
-    );
-    
-    // Here you would typically make an API call to update the completion status
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/goals/${goalId}/update-completion`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ completed: isCompleted })
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to update goal completion status');
-      }
-      
-      // Refresh goal progress after toggling completion
-      fetchActiveGoals();
-    } catch (error) {
-      console.error('Error updating goal completion:', error);
-      // Revert the UI change if the API call fails
-      setTodayGoals(prevGoals => 
-        prevGoals.map(goal => 
-          goal.goal_id === goalId 
-            ? { ...goal, completed: !isCompleted } 
-            : goal
-        )
-      );
-    }
-  };
   
   // BMI calculation function
   const calculateBMI = (heightValue = height, weightValue = weight) => {
     if (heightValue && weightValue) {
       const heightInMeters = parseFloat(heightValue) / 100;
       const weightInKg = parseFloat(weightValue) * 0.453592;
-      const bmi = (parseFloat(weightInKg) / (heightInMeters * heightInMeters)).toFixed(1);
+      const bmi = (parseFloat(weightInKg) / (heightInMeters * heightInMeters)).toFixed(2);
       setBmiResult(bmi);
       return bmi;
     }
@@ -369,12 +460,27 @@ const FitnessPlanner = () => {
   const formatDate = (date) => new Intl.DateTimeFormat("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" }).format(date);
   const sidebarWidth = isMobile ? 0 : 256;
 
+  // Format number with 2 decimal places
+  const formatDecimal = (num) => {
+    return parseFloat(num).toFixed(2);
+  };
+
   const handleDateClick = (day) => {
     const newDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
     setSelectedDate(newDate);
   };
 
-  // Calendar section from FitnessPlanner.js with month display fix
+  // Navigate to previous month
+  const handlePreviousMonth = () => {
+    setCurrentMonth(subMonths(currentMonth, 1));
+  };
+
+  // Navigate to next month
+  const handleNextMonth = () => {
+    setCurrentMonth(addMonths(currentMonth, 1));
+  };
+
+  // Calendar section with month display fix
   const generateCalendar = () => {
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
@@ -434,11 +540,11 @@ const FitnessPlanner = () => {
                   </div>
                   <div className="flex justify-between mb-2">
                     <span className="text-gray-700 font-medium">Height:</span>
-                    <span className="text-gray-900">{height} cm</span>
+                    <span className="text-gray-900">{formatDecimal(height)} cm</span>
                   </div>
                   <div className="flex justify-between mb-4">
                     <span className="text-gray-700 font-medium">Weight:</span>
-                    <span className="text-gray-900">{weight} kg</span>
+                    <span className="text-gray-900">{formatDecimal(weight)} kg</span>
                   </div>
                   <div className="text-3xl font-bold text-[#F8A13E] mb-1">
                     BMI: {bmiResult}
@@ -499,18 +605,27 @@ const FitnessPlanner = () => {
                     {isLoading ? (
                       <p className="text-white text-center">Loading goals...</p>
                     ) : todayGoals.length > 0 ? (
-                      todayGoals.map((goal, index) => (
-                        <div key={index} className="flex items-center text-lg">
-                          <input 
-                            type="checkbox" 
-                            className="mr-3 h-5 w-5 accent-orange-400" 
-                            checked={goal.completed || 
-                              activeGoals.some(ag => ag.goal_id === goal.goal_id && ag.overall_progress >= 100)}
-                            onChange={(e) => toggleGoalCompletion(goal.goal_id, e.target.checked)}
-                          />
-                          <span className="text-white font-bold">{goal.goal_name}</span>
-                        </div>
-                      ))
+                      todayGoals.map((goal, index) => {
+                        // Check if progress is logged for today
+                        const progressLog = progressLogs[goal.goal_id];
+                        const hasLoggedProgress = progressLog?.hasProgressForDate;
+                        const isCompleted = progressLog?.status === 'completed';
+                        
+                        return (
+                          <div key={index} className="mb-3">
+                            <div className="flex items-center text-lg">
+                              <input 
+                                type="checkbox" 
+                                className="mr-3 h-5 w-5 accent-orange-400" 
+                                checked={hasLoggedProgress} // Remove the "|| isCompleted" condition
+                                onChange={(e) => toggleGoalCompletion(goal.goal_id, e.target.checked)}
+                              />
+                              <span className="text-white font-bold">{goal.goal_name}</span>
+                            </div>
+                           
+                          </div>
+                        );
+                      })
                     ) : (
                       <p className="text-white text-center">No goals for this date.</p>
                     )}
@@ -520,11 +635,23 @@ const FitnessPlanner = () => {
                 <div>
                   <h2 className="text-xl font-semibold text-white mb-4">Calendar</h2>
                   <div className="bg-white p-6 rounded-xl shadow-lg">
-                    <div className="text-center mb-4">
+                    <div className="text-center mb-4 flex items-center justify-between">
+                      <button 
+                        onClick={handlePreviousMonth}
+                        className="text-gray-600 hover:text-gray-800 focus:outline-none"
+                      >
+                        &lt;
+                      </button>
                       <div className="text-2xl text-gray-800" style={{ fontFamily: "'Dancing Script', cursive" }}>
                         {monthNames[currentMonth.getMonth()]}
                         <span className="ml-2" style={{ fontFamily: "'Dancing Script', cursive" }}>{currentMonth.getFullYear()}</span>
                       </div>
+                      <button 
+                        onClick={handleNextMonth}
+                        className="text-gray-600 hover:text-gray-800 focus:outline-none"
+                      >
+                        &gt;
+                      </button>
                     </div>
                     <div className="grid grid-cols-7 gap-1 text-center">
                       {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
@@ -617,6 +744,7 @@ const FitnessPlanner = () => {
                 </div>
               </div>
             </div>
+            
             {/* Right column: Progress */}
             <div>
               <h2 className="text-xl font-semibold text-white mb-4">Progress of Goals</h2>
@@ -631,10 +759,10 @@ const FitnessPlanner = () => {
                         <span>{calculateProgress(goal)}%</span>
                       </div>
                       <div className="w-full h-2 bg-white bg-opacity-30 rounded-full">
-                        <div
-                          className="h-2 bg-white rounded-full"
-                          style={{ width: `${calculateProgress(goal)}%` }}
-                        ></div>
+                      <div
+                        className="h-2 bg-[#F8A13E] rounded-full" 
+                        style={{ width: `${calculateProgress(goal)}%` }}
+                      ></div>
                       </div>
                     </div>
                   ))
@@ -655,24 +783,78 @@ const FitnessPlanner = () => {
                   {isLoading ? (
                     <p className="text-white text-center">Loading goals...</p>
                   ) : todayGoals.length > 0 ? (
-                    todayGoals.map((goal, index) => (
-                      <div key={index} className="flex items-center text-lg">
-                        <input 
-                          type="checkbox" 
-                          className="mr-3 h-5 w-5 accent-orange-400" 
-                          checked={goal.completed || 
-                            activeGoals.some(ag => ag.goal_id === goal.goal_id && ag.overall_progress >= 100)}
-                          onChange={(e) => toggleGoalCompletion(goal.goal_id, e.target.checked)}
-                        />
-                        <span className="text-white font-bold">{goal.goal_name}</span>
-                      </div>
-                    ))
+                    todayGoals.map((goal, index) => {
+                      // Check if progress is logged for today
+                      const progressLog = progressLogs[goal.goal_id];
+                      const hasLoggedProgress = progressLog?.hasProgressForDate;
+                      const isCompleted = progressLog?.status === 'completed';
+                      
+                      return (
+                        <div key={index} className="flex items-center text-lg">
+                          // In both desktop and mobile views, replace the checkbox input with:
+                          <input 
+                            type="checkbox" 
+                            className="mr-3 h-5 w-5 accent-orange-400" 
+                            checked={hasLoggedProgress} // Remove the "|| isCompleted" condition
+                            onChange={(e) => toggleGoalCompletion(goal.goal_id, e.target.checked)}
+                          />
+                          <span className="text-white font-bold">{goal.goal_name}</span>
+                        </div>
+                      );
+                    })
                   ) : (
                     <p className="text-white text-center">No goals for this date.</p>
                   )}
                 </div>
               </div>
               
+              {/* Calendar for Mobile */}
+              <div>
+                <h2 className="text-xl font-semibold text-white mb-4">Calendar</h2>
+                <div className="bg-white p-6 rounded-xl shadow-lg">
+                  <div className="text-center mb-4 flex items-center justify-between">
+                    <button 
+                      onClick={handlePreviousMonth}
+                      className="text-gray-600 hover:text-gray-800 focus:outline-none"
+                    >
+                      &lt;
+                    </button>
+                    <div className="text-2xl text-gray-800" style={{ fontFamily: "'Dancing Script', cursive" }}>
+                      {monthNames[currentMonth.getMonth()]}
+                      <span className="ml-2" style={{ fontFamily: "'Dancing Script', cursive" }}>{currentMonth.getFullYear()}</span>
+                    </div>
+                    <button 
+                      onClick={handleNextMonth}
+                      className="text-gray-600 hover:text-gray-800 focus:outline-none"
+                    >
+                      &gt;
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-7 gap-1 text-center">
+                    {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
+                      <div key={i} className="font-medium text-sm">{d}</div>
+                    ))}
+                    {generateCalendar().map((day, i) => (
+                      <div key={i} className="p-1">
+                        {day ? (
+                          <button
+                            onClick={() => handleDateClick(day)}
+                            className={`w-7 h-7 rounded-full flex items-center justify-center text-sm ${
+                              selectedDate.getDate() === day &&
+                              selectedDate.getMonth() === currentMonth.getMonth() &&
+                              selectedDate.getFullYear() === currentMonth.getFullYear()
+                                ? 'bg-[#F8A13E] text-white'
+                                : 'hover:bg-gray-200'
+                            }`}
+                          >
+                            {day}
+                          </button>
+                        ) : <div className="w-7 h-7" />}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
               {/* AI Recommendations for Mobile */}
               <div>
                 <h2 className="text-xl font-semibold text-white mb-4">AI Recommendations</h2>
@@ -750,10 +932,10 @@ const FitnessPlanner = () => {
                           <span>{calculateProgress(goal)}%</span>
                         </div>
                         <div className="w-full h-2 bg-white bg-opacity-30 rounded-full">
-                          <div
-                            className="h-2 bg-white rounded-full"
-                            style={{ width: `${calculateProgress(goal)}%` }}
-                          ></div>
+                        <div
+                          className="h-2 bg-[#F8A13E] rounded-full" 
+                          style={{ width: `${calculateProgress(goal)}%` }}
+                        ></div>
                         </div>
                       </div>
                     ))

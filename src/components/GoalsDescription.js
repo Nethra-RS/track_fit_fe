@@ -24,19 +24,25 @@ const GoalDescription = () => {
   const [aiSummary, setAiSummary] = useState(null);
   const [error, setError] = useState(null);
   
-  // Add these states for the log progress modal
+  // States for progress logging
   const [logModalOpen, setLogModalOpen] = useState(false);
   const [goalTypes, setGoalTypes] = useState([]);
   const [selectedGoalType, setSelectedGoalType] = useState("");
   const [metricName, setMetricName] = useState("");
   const [metricValue, setMetricValue] = useState("");
   const [progressLogs, setProgressLogs] = useState([]);
-  const [refreshKey, setRefreshKey] = useState(0); // Used to trigger useEffect refresh
+  const [refreshKey, setRefreshKey] = useState(0);
   const [infoGoalId, setInfoGoalId] = useState(null);
+  
+  // States for editing and deleting logs
+  const [editingLog, setEditingLog] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteLogId, setDeleteLogId] = useState(null);
+  const [currentGoalType, setCurrentGoalType] = useState(null);
 
   const handleBlockedAction = () => setShowModal(true);
 
-  // Modified fetchGoalSummary function with improved error handling
+  // Function to fetch goal summary
   const fetchGoalSummary = async (goalId) => {
     try {
       console.log("Fetching goal summary for:", goalId);
@@ -126,7 +132,15 @@ const GoalDescription = () => {
         const found = goals.find((g) => g.goal_id === id);
         setGoalData(found);
         
-        // Now fetch the progress using the same API as FitnessPlanner.js
+        // Set the current goal type for the selected goal
+        if (found && found.goal_type_id) {
+          const types = await fetchGoalTypes();
+          const goalType = types.find(type => type.goal_type_id === found.goal_type_id);
+          setCurrentGoalType(goalType);
+          setSelectedGoalType(found.goal_type_id);
+        }
+        
+        // Now fetch the progress
         if (found) {
           await fetchGoalProgress(found.goal_id);
         } else {
@@ -193,9 +207,12 @@ const GoalDescription = () => {
         const formattedLogs = progressData.progress.map(log => ({
           id: log.progress_id,
           date: new Date(log.created_at).toLocaleDateString(),
-          metrics: log.metrics
+          metrics: log.metrics,
+          progress_id: log.progress_id
         }));
         setProgressLogs(formattedLogs);
+      } else {
+        setProgressLogs([]);
       }
     } catch (error) {
       console.error("Error fetching goal progress:", error);
@@ -233,47 +250,122 @@ const GoalDescription = () => {
   // Function to handle log progress submission
   const handleLogProgress = async () => {
     try {
-      // Find the selected metric
-      const selectedGoalTypeObj = goalTypes.find((g) => g.goal_type_id === selectedGoalType);
-      const metric = selectedGoalTypeObj?.metrics.find(m => m.metric_name === metricName);
+      // Find the appropriate metric_id
+      let metricId;
+      
+      // If editing, get the metric_id from the existing log
+      if (editingLog && editingLog.metrics && editingLog.metrics.length > 0) {
+        metricId = editingLog.metrics[0].metric_id;
+      } else {
+        // Otherwise, find the metric ID from the selected metric name
+        const selectedGoalTypeObj = goalTypes.find((g) => g.goal_type_id === selectedGoalType);
+        const metric = selectedGoalTypeObj?.metrics.find(m => m.metric_name === metricName);
+        if (!metric || !metric.metric_id) {
+          alert("Invalid input. Please ensure all fields are filled correctly.");
+          return;
+        }
+        metricId = metric.metric_id;
+      }
 
-      if (!metric || !metric.metric_id || !goalData?.goal_id) {
+      if (!metricId || !goalData?.goal_id) {
         alert("Invalid input. Please ensure all fields are filled correctly.");
         return;
       }
+
+      // Create the request body
+      const requestBody = {
+        goal_id: goalData.goal_id,
+        metrics: [{ metric_id: metricId, metric_val: Number(metricValue) }]
+      };
+      
+      // If we're editing, add the progress_id
+      if (editingLog) {
+        requestBody.progress_id = editingLog.progress_id;
+      }
+
+      console.log("Request body:", requestBody);
 
       const res = await fetch(`${API_BASE_URL}/api/goals/progress`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          goal_id: goalData.goal_id,
-          metrics: [{ metric_id: metric.metric_id, metric_val: Number(metricValue) }]
-        })
+        body: JSON.stringify(requestBody)
       });
 
       if (!res.ok) {
-        throw new Error("Failed to log progress");
+        const errorText = await res.text();
+        console.error("Error response:", errorText);
+        throw new Error(`Failed to ${editingLog ? 'update' : 'log'} progress: ${res.status}`);
       }
 
       const data = await res.json();
       console.log("Progress logged successfully:", data);
       
       // Reset form fields
-      setSelectedGoalType("");
+      setSelectedGoalType(currentGoalType?.goal_type_id || "");
       setMetricName("");
       setMetricValue("");
       setLogModalOpen(false);
+      setEditingLog(null);
       
       // Trigger refresh of goal data
       setRefreshKey(prev => prev + 1);
       
-      // Show success notification (you could add a toast notification system here)
-      alert("Progress logged successfully!");
+      // Show success notification
+      alert(editingLog ? "Progress updated successfully!" : "Progress logged successfully!");
     } catch (error) {
       console.error("Error logging progress:", error);
-      alert("Failed to log progress. Please try again.");
+      alert(`Failed to ${editingLog ? 'update' : 'log'} progress. Please try again.`);
     }
+  };
+
+  // Function to handle editing a progress log
+  const handleEditLog = (log) => {
+    console.log("Editing log:", log); // Debug log
+    setEditingLog(log);
+    setLogModalOpen(true);
+    
+    // Pre-fill the form with the log's data
+    if (currentGoalType) {
+      setSelectedGoalType(currentGoalType.goal_type_id);
+      
+      // If there are metrics, set the first one
+      if (log.metrics && log.metrics.length > 0) {
+        // Find the metric in the log
+        const metric = log.metrics[0]; // Currently only handling the first metric
+        
+        // Set metric name and value
+        setMetricName(metric.metric_name);
+        setMetricValue(metric.value);
+      }
+    }
+  };
+
+  // Function to handle deleting a progress log
+  const handleDeleteLog = async (progressId) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/goals/progress/${progressId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      
+      if (!res.ok) {
+        throw new Error("Failed to delete progress log");
+      }
+      
+      // Refresh the data
+      setRefreshKey(prev => prev + 1);
+      alert("Progress log deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting progress log:", error);
+      alert("Failed to delete progress log. Please try again.");
+    }
+  };
+
+  // Function to confirm deletion
+  const confirmDelete = (progressId) => {
+    setDeleteLogId(progressId);
+    setIsDeleting(true);
   };
 
   const toggleSidebar = () => setShowSidebar(!showSidebar);
@@ -370,29 +462,29 @@ const GoalDescription = () => {
                             <Trash2 size={16} />
                           </button>
                           <div 
-  className="position-relative"
-  onMouseEnter={() => setInfoGoalId(goalData.goal_id)}
-  onMouseLeave={() => setInfoGoalId(null)}
->
-  <Button
-    variant="light"
-    size="sm"
-    className="p-1 d-flex align-items-center justify-content-center"
-    style={{ width: '32px', height: '32px' }}
-  >
-    <Info size={16} />
-  </Button>
+                            className="position-relative"
+                            onMouseEnter={() => setInfoGoalId(goalData.goal_id)}
+                            onMouseLeave={() => setInfoGoalId(null)}
+                          >
+                            <Button
+                              variant="light"
+                              size="sm"
+                              className="p-1 d-flex align-items-center justify-content-center"
+                              style={{ width: '32px', height: '32px' }}
+                            >
+                              <Info size={16} />
+                            </Button>
 
-  {infoGoalId === goalData.goal_id && (
-    <div 
-      className="position-absolute bg-white shadow rounded p-2 small text-start"
-      style={{ bottom: '10px', right: '0', zIndex: 1000, width: '220px' }}
-    >
-      <strong>Start Date:</strong> {goalData.start_date?.split("T")[0] || "N/A"}<br />
-      <em className="text-muted">Check below for AI recommendations and log your progress.</em>
-    </div>
-  )}
-</div>
+                            {infoGoalId === goalData.goal_id && (
+                              <div 
+                                className="position-absolute bg-white shadow rounded p-2 small text-start"
+                                style={{ bottom: '10px', right: '0', zIndex: 1000, width: '220px' }}
+                              >
+                                <strong>Start Date:</strong> {goalData.start_date?.split("T")[0] || "N/A"}<br />
+                                <em className="text-muted">Check below for AI recommendations and log your progress.</em>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </td>
                     </tr>
@@ -486,22 +578,45 @@ const GoalDescription = () => {
                       <div className="text-white">
                         <h4 className="font-bold mb-3">Recent Progress:</h4>
                         <div className="space-y-2">
-                          {progressLogs.slice(0, 3).map((log, index) => (
+                          {progressLogs.map((log, index) => (
                             <div key={index} className="flex justify-between border-b border-white/30 pb-2">
                               <span>{log.date}</span>
-                              <div>
-                                {log.metrics.map((metric, idx) => (
-                                  <div key={idx} className="text-right">
-                                    <span className="font-medium">{metric.metric_name}: {metric.value}</span>
-                                  </div>
-                                ))}
+                              <div className="flex items-center">
+                                <div className="mr-4">
+                                  {log.metrics.map((metric, idx) => (
+                                    <div key={idx} className="text-right">
+                                      <span className="font-medium">{metric.metric_name}: {metric.value}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                                <div className="flex">
+                                  <button 
+                                    className="text-white hover:text-blue-200 mr-2"
+                                    onClick={() => handleEditLog(log)}
+                                  >
+                                    <Edit size={16} />
+                                  </button>
+                                  <button 
+                                    className="text-white hover:text-red-300"
+                                    onClick={() => confirmDelete(log.progress_id)}
+                                  >
+                                    <Trash2 size={16} />
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           ))}
                         </div>
                         <button 
                           className="mt-4 bg-white text-[#20639B] px-4 py-2 rounded-md font-medium hover:bg-opacity-90 transition-all"
-                          onClick={() => setLogModalOpen(true)}
+                          onClick={() => {
+                            setEditingLog(null);
+                            setLogModalOpen(true);
+                            // Reset form fields for new entry
+                            setMetricName("");
+                            setMetricValue("");
+                            setSelectedGoalType(currentGoalType?.goal_type_id || "");
+                          }}
                         >
                           Log New Progress
                         </button>
@@ -511,7 +626,12 @@ const GoalDescription = () => {
                         <p className="mb-3">No progress has been logged yet.</p>
                         <button 
                           className="bg-white text-[#20639B] px-4 py-2 rounded-md font-medium hover:bg-opacity-90 transition-all"
-                          onClick={() => setLogModalOpen(true)}
+                          onClick={() => {
+                            setEditingLog(null);
+                            setLogModalOpen(true);
+                            // Set default values for a new entry
+                            setSelectedGoalType(currentGoalType?.goal_type_id || "");
+                          }}
                         >
                           Start Logging Progress
                         </button>
@@ -532,55 +652,126 @@ const GoalDescription = () => {
       {/* Log Progress Modal */}
       {logModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-bold mb-4 text-center">Log Progress</h3>
+          <div className="rounded-lg max-w-md w-full overflow-hidden">
+            {/* Modal Header with gradient background */}
+            <div className="bg-gradient-to-r from-[#F9A03F] to-[#20639B] p-4">
+              <h3 className="text-xl font-bold text-white text-center">
+                {editingLog ? `Edit Progress Log (${new Date(editingLog.date).toLocaleDateString()})` : 'Log New Progress'}
+              </h3>
+            </div>
+            
+            {/* Modal Body with gradient background */}
+            <div className="bg-gradient-to-br from-[#F9A03F] via-[#3CAEA3] to-[#20639B] p-6">
+              <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
+                {editingLog && (
+                  <div className="bg-blue-100 text-blue-800 p-2 rounded mb-4">
+                    <p className="text-sm">You are editing an existing progress log. Only the metric value can be changed.</p>
+                  </div>
+                )}
+                
+                <label className="block text-sm font-medium mb-1 text-white">Type of Goal</label>
+                <select
+                  className="w-full border px-3 py-2 rounded mb-4 bg-white/90"
+                  value={selectedGoalType}
+                  onChange={(e) => setSelectedGoalType(e.target.value)}
+                  disabled={editingLog} // Disable changing goal type when editing
+                >
+                  <option value="">Select goal type</option>
+                  {goalTypes.map((type) => (
+                    <option key={type.goal_type_id} value={type.goal_type_id}>{type.goal_name}</option>
+                  ))}
+                </select>
 
-            <label className="block text-sm font-medium mb-1">Type of Goal</label>
-            <select
-              className="w-full border px-3 py-2 rounded mb-4"
-              value={selectedGoalType}
-              onChange={(e) => setSelectedGoalType(e.target.value)}
-            >
-              <option value="">Select goal type</option>
-              {goalTypes.map((type) => (
-                <option key={type.goal_type_id} value={type.goal_type_id}>{type.goal_name}</option>
-              ))}
-            </select>
+                <label className="block text-sm font-medium mb-1 text-white">Metric Name</label>
+                <select
+                  className="w-full border px-3 py-2 rounded mb-4 bg-white/90"
+                  value={metricName}
+                  onChange={(e) => setMetricName(e.target.value)}
+                  disabled={!selectedGoalType || editingLog} // Disable when no goal type or when editing
+                >
+                  <option value="">Select metric</option>
+                  {getAvailableMetrics().map((metric) => (
+                    <option key={metric.metric_id} value={metric.metric_name}>{metric.metric_name}</option>
+                  ))}
+                </select>
 
-            <label className="block text-sm font-medium mb-1">Metric Name</label>
-            <select
-              className="w-full border px-3 py-2 rounded mb-4"
-              value={metricName}
-              onChange={(e) => setMetricName(e.target.value)}
-              disabled={!selectedGoalType}
-            >
-              <option value="">Select metric</option>
-              {getAvailableMetrics().map((metric) => (
-                <option key={metric.metric_id} value={metric.metric_name}>{metric.metric_name}</option>
-              ))}
-            </select>
+                <label className="block text-sm font-medium mb-1 text-white">Metric Value</label>
+                <input
+                  className="w-full border px-3 py-2 rounded mb-6 bg-white/90"
+                  type="number"
+                  placeholder="Enter value"
+                  value={metricValue}
+                  onChange={(e) => setMetricValue(e.target.value)}
+                />
 
-            <label className="block text-sm font-medium mb-1">Metric Value</label>
-            <input
-              className="w-full border px-3 py-2 rounded mb-6"
-              type="number"
-              placeholder="Enter value"
-              value={metricValue}
-              onChange={(e) => setMetricValue(e.target.value)}
-            />
-
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setLogModalOpen(false)}>
-                Cancel
-              </Button>
-              <Button className="bg-blue-600 text-white" onClick={handleLogProgress}>
-                Submit
-              </Button>
+                <div className="flex justify-end gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setLogModalOpen(false);
+                      setEditingLog(null);
+                      setMetricName("");
+                      setMetricValue("");
+                    }}
+                    className="bg-white/90 hover:bg-white"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={handleLogProgress}
+                    className="bg-white text-[#20639B] hover:bg-white/90 font-medium"
+                  >
+                    {editingLog ? 'Save Changes' : 'Submit'}
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       )}
 
+
+      {/* Delete Confirmation Modal */}
+      {isDeleting && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">
+          <div className="rounded-lg max-w-md w-full overflow-hidden">
+            <div className="bg-gradient-to-r from-[#F9A03F] to-[#20639B] p-4">
+              <h3 className="text-xl font-bold text-white text-center">Confirm Delete</h3>
+            </div>
+            
+            <div className="bg-gradient-to-br from-[#F9A03F] via-[#3CAEA3] to-[#20639B] p-6">
+              <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
+                <p className="text-white mb-4">Are you sure you want to delete this progress log? This action cannot be undone.</p>
+                
+                <div className="flex justify-end gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setIsDeleting(false);
+                      setDeleteLogId(null);
+                    }}
+                    className="bg-white/90 hover:bg-white"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={() => {
+                      handleDeleteLog(deleteLogId);
+                      setIsDeleting(false);
+                      setDeleteLogId(null);
+                    }}
+                    className="bg-red-500 text-white hover:bg-red-600 font-medium"
+                  >
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+  
       {/* Action Not Allowed Modal */}
       {showModal && (
         <div
